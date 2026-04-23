@@ -1044,6 +1044,132 @@ function changerStatutReine(id,s){
   if(s==="Pondeuse"&&!r.datePonte)r.datePonte=today();
   sauverTout();render();
 }
+// ════════════════════════════════════════════════════════
+// VUE TRANSHUMANCE
+// ════════════════════════════════════════════════════════
+function vueTranshumance(){
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+  h+='<div class="stitle" style="margin-bottom:0">🚐 Transhumance</div>';
+  h+='<button class="btn" style="background:var(--blue);color:white;font-size:11px" onclick="formTransh(null)">+ Zone</button>';
+  h+='</div>';
+  STATUTS_TRANSH.forEach(function(s){
+    var zones=APP.transh.filter(function(t){return t.statut===s;});if(!zones.length)return;
+    var col=statutTranshColor(s);
+    h+='<div style="font-size:10px;font-weight:bold;color:'+col+';margin:9px 0 5px">'+s+' ('+zones.length+')</div>';
+    zones.forEach(function(t){
+      h+='<div class="card" style="border-left-color:'+col+';padding:9px;cursor:pointer" onclick="detailTransh('+t.id+')">';
+      h+='<div style="display:flex;justify-content:space-between"><strong>'+t.nom+'</strong>'+badge(s,col)+'</div>';
+      h+='<div style="font-size:9px;color:#888;margin-top:3px">'+t.commune+' · '+t.distance+'km · '+MOIS[t.mois_debut-1]+'→'+MOIS[t.mois_fin-1]+' · '+t.nb_ruches+' ruches</div>';
+      h+='</div>';
+    });
+  });
+  if(!APP.transh.length) h+='<div class="card" style="text-align:center;color:#aaa;padding:20px">Aucune zone enregistrée</div>';
+  return h;
+}
+function detailTransh(id){
+  var t=APP.transh.find(function(x){return x.id===id;});if(!t)return;
+  var col=statutTranshColor(t.statut);
+  var h='<div class="info-r"><span class="info-k">Zone</span><span class="info-v">'+t.nom+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Statut</span><span class="info-v">'+badge(t.statut,col)+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Distance</span><span class="info-v">'+t.distance+' km</span></div>';
+  h+='<div class="info-r"><span class="info-k">Période</span><span class="info-v">'+MOIS[t.mois_debut-1]+' → '+MOIS[t.mois_fin-1]+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Ruches prévues</span><span class="info-v">'+t.nb_ruches+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Type</span><span class="info-v">'+t.type+'</span></div>';
+  if(t.tel) h+='<div class="info-r"><span class="info-k">Tel</span><a href="tel:'+t.tel+'" style="color:var(--blue);font-size:11px">'+t.tel+'</a></div>';
+  if(t.notes) h+='<div style="background:#fffde7;border-radius:8px;padding:8px;font-size:11px;margin:8px 0;font-style:italic">📝 '+t.notes+'</div>';
+  h+='<div style="margin:10px 0 6px;font-size:10px;color:#888">Changer statut :</div>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">';
+  STATUTS_TRANSH.forEach(function(s){
+    h+='<button class="btn" style="font-size:9px;padding:4px 9px;background:'+(t.statut===s?statutTranshColor(s):"#eee")+';color:'+(t.statut===s?"white":"#333")+'" onclick="changerStatutTransh('+id+',''+s+'')">'+s+'</button>';
+  });
+  h+='</div>';
+  h+='<iframe src="https://www.google.com/maps?q='+t.lat+','+t.lng+'&z=11&output=embed" width="100%" height="130" frameborder="0" style="border:none;border-radius:7px;margin-bottom:10px" loading="lazy"></iframe>';
+  h+='<div style="display:flex;gap:7px"><button class="btn" style="background:var(--blue);color:white;flex:2" onclick="formTransh('+id+');fermerModal()">✏️</button><button class="btn" style="background:var(--red);color:white" onclick="suppTransh('+id+')">🗑️</button></div>';
+  ouvrirModal("🚐 "+t.nom,h);
+}
+function changerStatutTransh(id,s){var t=APP.transh.find(function(x){return x.id===id;});if(t){t.statut=s;sauverTout();fermerModal();render();}}
+function suppTransh(id){if(!confirm("Supprimer ?"))return;APP.transh=APP.transh.filter(function(x){return x.id!==id;});sauverTout();fermerModal();render();}
+function formTransh(id){
+  var t=id?APP.transh.find(function(x){return x.id===id;}):null;
+  var h='<input class="inp" id="t-nom" value="'+(t?t.nom:"")+'" placeholder="Nom de la zone *"><input class="inp" id="t-com" value="'+(t?t.commune:"")+'" placeholder="Commune">';
+  h+='<div class="grid2"><input class="inp" id="t-dist" type="number" value="'+(t?t.distance:50)+'" placeholder="Distance km"><input class="inp" id="t-ruches" type="number" value="'+(t?t.nb_ruches:10)+'" placeholder="Nb ruches"></div>';
+  h+='<div class="grid2"><select class="inp" id="t-type">'+["ONF","Mairie","Privé","Agriculteur"].map(function(x){return'<option '+(t&&t.type===x?"selected":"")+'>'+x+'</option>';}).join("")+'</select>';
+  h+='<select class="inp" id="t-stat">'+STATUTS_TRANSH.map(function(s){return'<option '+(t&&t.statut===s?"selected":"")+'>'+s+'</option>';}).join("")+'</select></div>';
+  h+='<div class="grid2"><select class="inp" id="t-deb">'+MOIS.map(function(m,i){return'<option value="'+(i+1)+'" '+(t&&t.mois_debut===(i+1)?"selected":"")+'>'+m+'</option>';}).join("")+'</select>';
+  h+='<select class="inp" id="t-fin">'+MOIS.map(function(m,i){return'<option value="'+(i+1)+'" '+(t&&t.mois_fin===(i+1)?"selected":"")+'>'+m+'</option>';}).join("")+'</select></div>';
+  h+='<input class="inp" id="t-tel" value="'+(t?t.tel||"":"")+'" placeholder="Téléphone">';
+  h+='<div class="grid2"><input class="inp" id="t-lat" type="number" step="0.001" value="'+(t?t.lat:44)+'" placeholder="Latitude"><input class="inp" id="t-lng" type="number" step="0.001" value="'+(t?t.lng:1.5)+'" placeholder="Longitude"></div>';
+  h+='<textarea class="inp" id="t-notes" rows="2">'+(t?t.notes:"")+'</textarea>';
+  h+='<button class="btn full" style="background:var(--blue);color:white" onclick="sauverTransh('+(t?t.id:"null")+')">'+(t?"💾":"✅ Ajouter")+'</button>';
+  ouvrirModal(t?"Modifier "+t.nom:"Nouvelle zone",h);
+}
+function sauverTransh(id){
+  var nom=document.getElementById("t-nom").value.trim();if(!nom){alert("Nom obligatoire");return;}
+  var data={nom:nom,commune:document.getElementById("t-com").value,distance:parseInt(document.getElementById("t-dist").value)||50,nb_ruches:parseInt(document.getElementById("t-ruches").value)||10,type:document.getElementById("t-type").value,statut:document.getElementById("t-stat").value,mois_debut:parseInt(document.getElementById("t-deb").value),mois_fin:parseInt(document.getElementById("t-fin").value),tel:document.getElementById("t-tel").value,lat:parseFloat(document.getElementById("t-lat").value)||44,lng:parseFloat(document.getElementById("t-lng").value)||1.5,notes:document.getElementById("t-notes").value.trim(),miellees:[]};
+  if(id){Object.assign(APP.transh.find(function(x){return x.id===id;}),data);}else{data.id=genId();APP.transh.push(data);}
+  sauverTout();fermerModal();render();
+}
+
+// ════════════════════════════════════════════════════════
+// VUE COMPTA
+// ════════════════════════════════════════════════════════
+function vueCompta(){
+  var ca=APP.ventes.reduce(function(a,v){return a+(v.montant||0);},0);
+  var dep=APP.depenses.reduce(function(a,d){return a+(d.montant||0);},0);
+  var h='<div class="stitle">💰 Comptabilité</div>';
+  h+='<div class="stat-row"><div class="stat-box"><div class="stat-nb" style="color:var(--green)">'+ca+'€</div><div class="stat-lb">Ventes</div></div>';
+  h+='<div class="stat-box"><div class="stat-nb" style="color:var(--red)">'+dep+'€</div><div class="stat-lb">Dépenses</div></div>';
+  h+='<div class="stat-box"><div class="stat-nb" style="color:'+(ca-dep>=0?"var(--green)":"var(--red)")+'">'+(ca-dep)+'€</div><div class="stat-lb">Bilan</div></div></div>';
+  h+='<div style="display:flex;gap:8px;margin-bottom:12px"><button class="btn" style="background:var(--green);color:white;flex:1" onclick="formVente()">+ Vente</button><button class="btn" style="background:var(--red);color:white;flex:1" onclick="formDepense()">+ Dépense</button></div>';
+  var ops=APP.ventes.map(function(v){return{date:v.date,lib:v.produit+(v.client?" — "+v.client:""),montant:"+"+v.montant+"€",col:"var(--green)"};})
+    .concat(APP.depenses.map(function(d){return{date:d.date,lib:d.label,montant:"-"+d.montant+"€",col:"var(--red)"};}))
+    .sort(function(a,b){return new Date(b.date)-new Date(a.date);}).slice(0,20);
+  if(!ops.length) h+='<div class="card" style="text-align:center;color:#aaa">Aucune opération</div>';
+  ops.forEach(function(o){h+='<div class="card" style="padding:8px;border-left-color:'+o.col+'"><div style="display:flex;justify-content:space-between"><span style="font-size:11px">'+o.lib+'</span><strong style="color:'+o.col+'">'+o.montant+'</strong></div><div style="font-size:9px;color:#aaa">'+fmt(o.date)+'</div></div>';});
+  return h;
+}
+function formVente(){
+  var h='<input class="inp" id="v-prod" placeholder="Produit"><input class="inp" id="v-client" placeholder="Client"><input class="inp" id="v-montant" type="number" placeholder="Montant €"><input class="inp" id="v-date" type="date" value="'+today()+'"><textarea class="inp" id="v-notes" rows="2"></textarea>';
+  h+='<button class="btn full" style="background:var(--green);color:white" onclick="sauverVente()">✅ Enregistrer</button>';
+  ouvrirModal("💰 Vente",h);
+}
+function sauverVente(){APP.ventes.push({id:genId(),produit:document.getElementById("v-prod").value,client:document.getElementById("v-client").value,montant:parseFloat(document.getElementById("v-montant").value)||0,date:document.getElementById("v-date").value,notes:document.getElementById("v-notes").value});sauverTout();fermerModal();render();}
+function formDepense(){
+  var h='<input class="inp" id="d-lab" placeholder="Libellé *"><input class="inp" id="d-montant" type="number" placeholder="Montant €"><input class="inp" id="d-date" type="date" value="'+today()+'">';
+  h+='<button class="btn full" style="background:var(--red);color:white" onclick="sauverDepense()">✅ Enregistrer</button>';
+  ouvrirModal("💸 Dépense",h);
+}
+function sauverDepense(){APP.depenses.push({id:genId(),label:document.getElementById("d-lab").value,montant:parseFloat(document.getElementById("d-montant").value)||0,date:document.getElementById("d-date").value});sauverTout();fermerModal();render();}
+
+// ════════════════════════════════════════════════════════
+// VUE JOURNAL
+// ════════════════════════════════════════════════════════
+function vueJournal(){
+  var h='<div class="stitle">📖 Journal</div><button class="btn full" style="background:var(--dark);color:var(--gold)" onclick="formJournal(null)">+ Note</button>';
+  if(!APP.journal.length) h+='<div class="card" style="text-align:center;color:#aaa">Aucune note</div>';
+  APP.journal.slice().reverse().forEach(function(j){
+    h+='<div class="card" style="border-left-color:#888;cursor:pointer" onclick="formJournal('+j.id+')">';
+    h+='<div style="display:flex;justify-content:space-between;margin-bottom:2px"><strong style="font-size:12px">'+j.titre+'</strong><span style="font-size:9px;color:#aaa">'+fmt(j.date)+'</span></div>';
+    if(j.rucher) h+='<div style="font-size:9px;color:#aaa">📍 '+j.rucher+'</div>';
+    h+='<div style="font-size:11px;color:#555;margin-top:3px">'+j.texte.substring(0,100)+(j.texte.length>100?"...":"")+'</div></div>';
+  });
+  return h;
+}
+function formJournal(id){
+  var j=id?APP.journal.find(function(x){return x.id===id;}):null;
+  var opts=APP.ruchers.map(function(r){return'<option '+(j&&j.rucher===r.nom?"selected":"")+'>'+r.nom+'</option>';}).join("");
+  var h='<input class="inp" id="j-titre" value="'+(j?j.titre:"")+'" placeholder="Titre *"><select class="inp" id="j-ruch"><option value="">— Rucher —</option>'+opts+'</select><input class="inp" id="j-date" type="date" value="'+(j?j.date:today())+'"><textarea class="inp" id="j-texte" rows="5" placeholder="Observations…">'+(j?j.texte||"":"")+'</textarea>';
+  h+='<div style="display:flex;gap:7px"><button class="btn" style="background:var(--dark);color:var(--gold);flex:2" onclick="sauverJournal('+(j?j.id:"null")+')">'+(j?"💾":"✅")+'</button>'+(j?'<button class="btn" style="background:var(--red);color:white" onclick="suppJournal('+j.id+')">🗑️</button>':'')+'</div>';
+  ouvrirModal(j?"Modifier note":"📖 Note",h);
+}
+function sauverJournal(id){
+  var t=document.getElementById("j-titre").value.trim();if(!t){alert("Titre obligatoire");return;}
+  var data={titre:t,rucher:document.getElementById("j-ruch").value,date:document.getElementById("j-date").value,texte:document.getElementById("j-texte").value.trim()};
+  if(id){Object.assign(APP.journal.find(function(x){return x.id===id;}),data);}else{data.id=genId();APP.journal.push(data);}
+  sauverTout();fermerModal();render();
+}
+function suppJournal(id){if(!confirm("Supprimer ?"))return;APP.journal=APP.journal.filter(function(x){return x.id!==id;});sauverTout();fermerModal();render();}
+
 function fabAction(){
   var a={ruches:function(){formRuche(null);},stock:formStockItem,miel:function(){formStock(null);},reines:function(){formReine(null);},transh:function(){formTransh(null);},compta:formVente,journal:function(){formJournal(null);},carte:function(){formRucher(null);}};
   (a[APP.vue]||demarrerVoix)();
