@@ -113,7 +113,10 @@ select.inp{-webkit-appearance:none}
     <div class="voice-resultat-msg" id="voice-msg"></div>
     <div id="voice-actions"></div>
   </div>
-  <button class="voice-stop" onclick="fermerVoix()">✕ Fermer</button>
+  <div style="display:flex;gap:10px;margin-top:6px">
+    <button class="voice-stop" onclick="repondreVoix()" id="btn-repondre" style="background:rgba(232,168,0,.3);border:1px solid var(--gold);color:var(--gold)">🎙️ Répondre</button>
+    <button class="voice-stop" onclick="fermerVoix()">✕ Fermer</button>
+  </div>
 </div>
 
 <!-- MODAL -->
@@ -265,6 +268,35 @@ function fermerVoix(){
   recog=null;
   document.getElementById("voice-overlay").classList.add("hidden");
   document.getElementById("mic-btn").className="mic-btn";
+}
+
+function repondreVoix(){
+  // Réinitialiser l'overlay pour une nouvelle dictée sans fermer
+  document.getElementById("voice-onde").className="voice-onde anim";
+  document.getElementById("voice-onde").textContent="🎙️";
+  document.getElementById("voice-titre").textContent="Parlez maintenant…";
+  document.getElementById("voice-retranscrit").textContent="";
+  document.getElementById("voice-resultat").classList.add("hidden");
+  document.getElementById("mic-btn").className="mic-btn ecoute";
+
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recog=new SR();
+  recog.lang="fr-FR";recog.continuous=false;recog.interimResults=true;
+
+  recog.onresult=function(e){
+    var txt="",final=false;
+    for(var i=e.resultIndex;i<e.results.length;i++){
+      txt+=e.results[i][0].transcript;
+      if(e.results[i].isFinal)final=true;
+    }
+    document.getElementById("voice-retranscrit").textContent='"'+txt+'"';
+    if(final){recog.stop();envoyerAIA(txt);}
+  };
+  recog.onerror=function(e){
+    document.getElementById("voice-titre").textContent="Erreur: "+e.error;
+    document.getElementById("mic-btn").className="mic-btn";
+  };
+  recog.start();
 }
 
 async function envoyerAIA(texte){
