@@ -331,7 +331,7 @@ function vueAccueil(){
 // ── VUE RUCHES ──────────────────────────────────────────────
 function vueRuches(){
   var p=rP(),v=rV();
-  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="stitle" style="margin-bottom:0">Ruches</div><button class="btn" style="background:var(--gold);color:var(--dark);font-size:11px" onclick="formRuche(null)">+ Nouvelle</button></div>';
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="stitle" style="margin-bottom:0">Ruches</div><div style="display:flex;gap:5px"><button class="btn" style="background:#555;color:white;font-size:10px" onclick="imprimerEtiquettesRuches(APP.subvue==='pleines'?'Pleine':'Vide')">QR &amp; etiq.</button><button class="btn" style="background:var(--gold);color:var(--dark);font-size:11px" onclick="formRuche(null)">+ Nouvelle</button></div></div>';
   h+='<div class="subtabs"><button class="stab'+(APP.subvue==="pleines"?" on":"")+'" onclick="APP.subvue=\'pleines\';render()">Pleines ('+p.length+')</button><button class="stab'+(APP.subvue==="vides"?" on":"")+'" onclick="APP.subvue=\'vides\';render()">Vides ('+v.length+')</button></div>';
   return h+renderRuches(APP.subvue==="pleines"?p:v);
 }
@@ -375,6 +375,13 @@ function detailRuche(id){
   var isV=r.typeRuche==="Vide"||r.typeRuche==="Nucleus"||r.typeRuche==="Ruchette";
   h+='<div style="display:flex;gap:7px;margin-top:12px"><button class="btn" style="background:var(--gold);color:var(--dark);flex:2" onclick="formRuche('+id+');fM()">Modifier</button><button class="btn" style="background:var(--green);color:white" onclick="inspRapide('+id+');fM()">OK</button><button class="btn" style="background:var(--red);color:white" onclick="suppRuche('+id+')">X</button></div>';
   h+='<button class="btn full" style="background:'+(isV?"var(--green)":"#888")+';color:white;margin-top:8px" onclick="bascule('+id+')">'+(isV?"Mettre en Pleine":"Mettre en Vide")+'</button>';
+  // QR Code
+  var qrData="JJ-RUCHE:"+r.numero+(r.rucher?"|"+r.rucher:"")+(r.reine?"|REINE:"+r.reine:"");
+  h+='<div style="text-align:center;margin-top:10px;padding-top:10px;border-top:1px solid #f0ebe0">';
+  h+='<div style="font-size:10px;color:#888;margin-bottom:6px">QR Code ruche</div>';
+  h+='<img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data='+encodeURIComponent(qrData)+'" width="120" height="120" style="border:1px solid #e0d5c0;border-radius:8px;display:block;margin:0 auto 8px">';
+  h+='<button class="btn" style="background:var(--dark);color:var(--gold);font-size:10px;width:100%" onclick="imprimerEtiquettesRuches()">Imprimer etiquettes ruches</button>';
+  h+='</div>';
   oM("Ruche "+r.numero,h);
 }
 function bascule(id){var r=APP.ruches.find(function(x){return x.id===id;});if(!r)return;r.typeRuche=(r.typeRuche==="Vide"||r.typeRuche==="Nucleus"||r.typeRuche==="Ruchette")?"Pleine":"Vide";sT();fM();render();}
@@ -502,7 +509,7 @@ function vueReines(){
   h+='</select><select style="padding:6px 9px;border-radius:8px;border:1.5px solid #d97706;background:white;font-size:11px" onchange="APP.reinesFiltreStatut=this.value;APP.reineSelected=null;render()">';
   h+='<option value="Tous">Tous statuts</option>';
   STATUTS_REINE.forEach(function(s){h+='<option value="'+s+'" '+(filtreS===s?"selected":"")+'>'+s+'</option>';});
-  h+='</select><span style="font-size:10px;color:#888">'+list.length+' reine(s)</span><div style="flex:1"></div><button class="btn" style="background:linear-gradient(135deg,#b45309,#d97706);color:white;font-size:11px" onclick="formReine(null)">+ Nouvelle</button></div>';
+  h+='</select><span style="font-size:10px;color:#888">'+list.length+' reine(s)</span><div style="flex:1"></div><button class="btn" style="background:#555;color:white;font-size:10px;margin-right:5px" onclick="imprimerEtiquettesReines(filtre==='Toutes'?null:filtre)">Imprimer etiq.</button><button class="btn" style="background:linear-gradient(135deg,#b45309,#d97706);color:white;font-size:11px" onclick="formReine(null)">+ Nouvelle</button></div>';
   h+='<div style="display:flex;gap:10px;align-items:flex-start"><div style="flex:1;overflow-x:auto;min-width:0">';
   h+='<table style="width:100%;border-collapse:collapse;background:white;border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(146,64,14,.08);font-size:11px">';
   h+='<thead><tr style="background:linear-gradient(135deg,#92400e,#b45309);color:white">';
@@ -646,6 +653,84 @@ function formJournal(id){
 function saveJournal(id){var t=document.getElementById("j-titre").value.trim();if(!t){alert("Titre obligatoire");return;}var data={titre:t,rucher:document.getElementById("j-ruch").value,date:document.getElementById("j-date").value,texte:document.getElementById("j-texte").value.trim()};if(id){Object.assign(APP.journal.find(function(x){return x.id===id;}),data);}else{data.id=gId();APP.journal.push(data);}sT();fM();render();}
 function suppJournal(id){if(!confirm("Supprimer?"))return;APP.journal=APP.journal.filter(function(x){return x.id!==id;});sT();fM();render();}
 // ── FAB & RENDER ──────────────────────────────────────────────
+// ── IMPRESSION ETIQUETTES REINES ──────────────────────────────
+function imprimerEtiquettesReines(filtre){
+  var list = filtre ? APP.reines.filter(function(r){return r.greffage===filtre;}) : APP.reines;
+  var GCOLS_PRINT={"G1-Delanoy F1":{border:"#8b5cf6",label:"F1 Delanoy"},"G1-Delanoy F3":{border:"#f97316",label:"F3 Delanoy - Souche naturelle"},"G2-Yann F1":{border:"#3b82f6",label:"Yann F1"},"G3-Delanoy F1":{border:"#ec4899",label:"F1 Delanoy"},"G4-Yann F1":{border:"#10b981",label:"Yann F1"}};
+  function fmtPrint(d){return d?new Date(d).toLocaleDateString("fr-FR"):"~?";}
+  var html = '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Etiquettes Reines J&J</title><style>';
+  html += '*{margin:0;padding:0;box-sizing:border-box;} body{font-family:Arial,sans-serif;background:white;} ';
+  html += '.page-title{text-align:center;font-size:10px;color:#666;padding:8px;border-bottom:1px solid #ddd;margin-bottom:8px;} ';
+  html += '.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:4px;} ';
+  html += '.etiq{border:2px solid #8b5cf6;border-radius:6px;padding:6px 7px;font-family:Arial,sans-serif;break-inside:avoid;} ';
+  html += '.etiq-header{font-size:9px;font-weight:bold;color:#1f2937;border-bottom:1px solid #e5e7eb;padding-bottom:3px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;} ';
+  html += '.etiq-num{font-size:11px;font-weight:900;color:#92400e;font-family:monospace;} ';
+  html += '.etiq-souche{font-size:8px;color:#6d28d9;font-weight:bold;} ';
+  html += '.etiq-body{display:grid;grid-template-columns:1fr 1fr;gap:2px;} ';
+  html += '.etiq-field{} .etiq-label{font-size:6px;color:#9ca3af;text-transform:uppercase;letter-spacing:.3px;font-weight:bold;} ';
+  html += '.etiq-val{font-size:8px;color:#1f2937;font-weight:600;} ';
+  html += '.etiq-footer{margin-top:4px;padding-top:3px;border-top:1px solid #e5e7eb;font-size:6px;color:#6b7280;display:flex;justify-content:space-between;} ';
+  html += '.badge-blanc{display:inline-block;background:#f3f4f6;border:1.5px solid #d1d5db;border-radius:3px;padding:1px 4px;font-size:6px;font-weight:bold;color:#374151;} ';
+  html += '@media print{.page-title{position:fixed;top:0;width:100%;} .grid{margin-top:40px;} @page{size:A4;margin:8mm;}}';
+  html += '</style></head><body>';
+  html += '<div class="page-title">J&J Les Ruchers de Seguela - '+list.length+' etiquettes - Buckfast 2026 - <button onclick="window.print()" style="background:#8b5cf6;color:white;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:10px">Imprimer</button></div>';
+  html += '<div class="grid">';
+  list.forEach(function(r){
+    var gc = GCOLS_PRINT[r.greffage]||{border:"#d1d5db",label:r.greffage||""};
+    html += '<div class="etiq" style="border-color:'+gc.border+'">';
+    html += '<div class="etiq-header"><div><div class="etiq-num">'+r.numero+'</div><div class="etiq-souche">'+gc.label+'</div></div><div style="font-size:8px;text-align:right;color:#6b7280">'+r.ruche+'</div></div>';
+    html += '<div class="etiq-body">';
+    html += '<div class="etiq-field"><div class="etiq-label">Souche mere</div><div class="etiq-val">'+(r.mere||"Delanoy F1")+'</div></div>';
+    html += '<div class="etiq-field"><div class="etiq-label">Race</div><div class="etiq-val">Buckfast</div></div>';
+    html += '<div class="etiq-field"><div class="etiq-label">Greffe</div><div class="etiq-val">'+(r.dateGreffe?new Date(r.dateGreffe).toLocaleDateString("fr-FR").slice(0,8):"05/04/26")+'</div></div>';
+    html += '<div class="etiq-field"><div class="etiq-label">Naissance</div><div class="etiq-val">'+(r.dateNee?new Date(r.dateNee).toLocaleDateString("fr-FR").slice(0,8):"~15/04/26")+'</div></div>';
+    html += '<div class="etiq-field"><div class="etiq-label">Fecond.</div><div class="etiq-val">'+(r.dateFeco?new Date(r.dateFeco).toLocaleDateString("fr-FR").slice(0,8):"~26/04/26")+'</div></div>';
+    html += '<div class="etiq-field"><div class="etiq-label">Ponte</div><div class="etiq-val">'+(r.datePonte?new Date(r.datePonte).toLocaleDateString("fr-FR").slice(0,8):"~04/05/26")+'</div></div>';
+    html += '</div>';
+    html += '<div class="etiq-footer"><span>'+r.statut+'</span><span class="badge-blanc">2026 BLANC</span></div>';
+    html += '</div>';
+  });
+  html += '</div></body></html>';
+  var w = window.open('','_blank');
+  w.document.write(html);
+  w.document.close();
+}
+
+// ── IMPRESSION ETIQUETTES RUCHES / HAUSSES ──────────────────────────────
+function imprimerEtiquettesRuches(typeFiltre){
+  var list = typeFiltre ? APP.ruches.filter(function(r){return r.typeRuche===typeFiltre||(!r.typeRuche&&typeFiltre==="Pleine");}) : APP.ruches;
+  var html = '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Etiquettes Ruches J&J</title><style>';
+  html += '*{margin:0;padding:0;box-sizing:border-box;} body{font-family:Arial,sans-serif;background:white;} ';
+  html += '.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:6px;} ';
+  html += '.etiq{border:2px solid #E8A800;border-radius:8px;padding:8px;text-align:center;break-inside:avoid;} ';
+  html += '.etiq-num{font-size:13px;font-weight:900;color:#1C1208;font-family:monospace;margin-bottom:4px;} ';
+  html += '.etiq-info{font-size:8px;color:#555;margin-bottom:6px;} ';
+  html += '.etiq-qr{margin:4px auto;display:block;} ';
+  html += '.etiq-footer{font-size:7px;color:#888;margin-top:4px;border-top:1px solid #f0e8d0;padding-top:3px;} ';
+  html += '.page-title{text-align:center;font-size:10px;color:#666;padding:8px;border-bottom:1px solid #ddd;margin-bottom:8px;} ';
+  html += '@media print{@page{size:A4;margin:8mm;}}';
+  html += '</style></head><body>';
+  html += '<div class="page-title">J&J Les Ruchers de Seguela - Etiquettes Ruches - <button onclick="window.print()" style="background:#E8A800;color:#1C1208;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:10px;font-weight:bold">Imprimer</button></div>';
+  html += '<div class="grid">';
+  list.forEach(function(r){
+    var qrData = "JJ-RUCHE:"+r.numero+(r.rucher?"|"+r.rucher:"")+(r.reine?"|REINE:"+r.reine:"");
+    var qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=80x80&data="+encodeURIComponent(qrData);
+    html += '<div class="etiq">';
+    html += '<div class="etiq-num">'+r.numero+'</div>';
+    html += '<div class="etiq-info">'+(r.rucher||"")+(r.typeRuche?" - "+r.typeRuche:"")+'</div>';
+    html += '<img class="etiq-qr" src="'+qrUrl+'" width="80" height="80" alt="QR '+r.numero+'">';
+    html += '<div class="etiq-footer">J&J Les Ruchers de Seguela<br>'+(r.reine?"Reine: "+r.reine:"Sans reine")+'</div>';
+    html += '</div>';
+  });
+  html += '</div></body></html>';
+  var w = window.open('','_blank');
+  w.document.write(html);
+  w.document.close();
+}
+
+// ── QR CODE INLINE ──────────────────────────────────────────
+function qrUrl(data){return "https://api.qrserver.com/v1/create-qr-code/?size=120x120&data="+encodeURIComponent(data);}
+
 function fabAction(){
   var a={ruches:function(){formRuche(null);},stock:formSI,miel:function(){formStock(null);},reines:function(){formReine(null);},transh:function(){formTransh(null);},compta:formVente,journal:function(){formJournal(null);},carte:function(){formRucher(null);}};
   (a[APP.vue]||demarrerVoix)();
