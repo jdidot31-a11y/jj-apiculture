@@ -306,11 +306,20 @@ async function envoyerAIA(texte){
   document.getElementById("mic-btn").className="mic-btn traite";
 
   // Préparer le contexte de l'app
+  // Calculer prochain numéro disponible par préfixe
+  function getNextNum(prefix){
+    var nums=APP.ruches
+      .filter(function(r){return r.numero&&r.numero.toUpperCase().startsWith(prefix.toUpperCase());})
+      .map(function(r){return parseInt((r.numero.match(/\d+$/)||["0"])[0]);})
+      .filter(function(n){return !isNaN(n);});
+    return nums.length?Math.max.apply(null,nums)+1:1;
+  }
   var contexte={
     ruchers:APP.ruchers.map(function(r){return{id:r.id,nom:r.nom};}),
     ruches:APP.ruches.map(function(r){return{id:r.id,numero:r.numero,typeRuche:r.typeRuche||"Pleine",rucher:r.rucher,etat:r.etat};}),
     reines:APP.reines.slice(0,20).map(function(r){return{id:r.id,numero:r.numero,statut:r.statut,elevage:r.elevage};}),
-    nbReines:APP.reines.length
+    nbReines:APP.reines.length,
+    prochainNumero:{JQ:getNextNum("JQ-"),RV:getNextNum("RV-"),NUC:getNextNum("NUC-"),RU:getNextNum("RU-")}
   };
 
   var systemPrompt=`Tu es l'assistant apicole de J & J Les Ruchers de Séguéla (Julien Méry & Jacques Didot, Génébrières 82230, Occitanie). Race exclusive : Buckfast. Types de ruches : Dadant, Langstroth, Voirnot.
@@ -318,7 +327,8 @@ async function envoyerAIA(texte){
 DONNÉES ACTUELLES :
 Ruchers : ${APP.ruchers.map(function(r){return r.nom;}).join(", ")}
 Ruches enregistrées : ${APP.ruches.length} (${ruchesPleines().length} pleines, ${ruchesVides().length} vides)
-Numéros de ruches : ${APP.ruches.slice(0,30).map(function(r){return r.numero;}).join(", ")}${APP.ruches.length>30?"...":""}
+Numéros existants : ${APP.ruches.slice(0,30).map(function(r){return r.numero;}).join(", ")}${APP.ruches.length>30?"...":""}
+Prochains numéros disponibles : JQ-${String(contexte.prochainNumero.JQ).padStart(3,"0")}, RV-${String(contexte.prochainNumero.RV).padStart(3,"0")}, NUC-${String(contexte.prochainNumero.NUC).padStart(3,"0")}
 Reines : ${APP.reines.length} (statuts: ${(function(){var s={};APP.reines.forEach(function(r){s[r.statut]=(s[r.statut]||0)+1;});return Object.entries(s).map(function(e){return e[0]+":"+e[1];}).join(", ");})()})
 
 DATE AUJOURD'HUI : ${today()}
@@ -331,7 +341,10 @@ Tu dois analyser le message vocal (avec accent toulousain possible, erreurs de d
 
 TYPES D'ACTIONS :
 1. update_ruche: {"type":"update_ruche","numero":"JQ-001","champs":{"etat":"Excellent","insp":"${today()}","pop":4,"mel":3,"mal":"Aucune","reine":"2026","race":"Buckfast","notes":"...","typeRuche":"Pleine"}}
-2. add_ruche: {"type":"add_ruche","data":{"numero":"JQ-050","typeRuche":"Pleine","rucher":"Rucher Jacques","etat":"Bon","pop":3,"mel":3,"mal":"Aucune","insp":"${today()}","reine":"","race":"Buckfast","notes":""}}
+2. add_ruche: Pour UNE ruche : {"type":"add_ruche","data":{"numero":"JQ-050","typeRuche":"Vide","rucher":"Rucher Jacques","etat":"Bon","pop":0,"mel":0,"mal":"Aucune","insp":"","reine":"","race":"Buckfast","notes":""}}
+   Pour PLUSIEURS ruches (ex: "créer 50 ruchettes") : {"type":"add_ruche","batch":[{"numero":"RV-001","typeRuche":"Vide","rucher":"Rucher Jacques","etat":"Bon","pop":0,"mel":0,"mal":"Aucune","insp":"","reine":"","race":"Buckfast","notes":""},{"numero":"RV-002",...},{"numero":"RV-003",...}...]}
+   IMPORTANT : Toujours créer les numéros EN SÉQUENCE à partir du dernier existant. Chercher le plus grand numéro existant et continuer. Ex: si RV-012 existe déjà, commencer à RV-013.
+   RÈGLE CRITIQUE : Une ruche SANS reine = typeRuche "Vide". Une ruche AVEC reine = typeRuche "Pleine".
 3. update_reine: {"type":"update_reine","numero":"R2026-D01","champs":{"statut":"Vierge","dateNee":"${today()}"}}
 4. add_journal: {"type":"add_journal","data":{"titre":"Visite rucher","texte":"...","rucher":"Rucher Jacques","date":"${today()}"}}
 5. add_stock_miel: {"type":"add_stock_miel","data":{"type":"Colza","poids":12.5,"rucher":"Rucher Jacques","date":"${today()}","notes":""}}
@@ -351,7 +364,11 @@ RÈGLES :
 - "reine pond bien" → statut Pondeuse + datePonte aujourd'hui
 - "née/éclose" → statut Vierge + dateNee aujourd'hui
 - "essaimé" → noter dans notes ET créer entrée journal
-- "dadant/langstroth/voirnot" = type de ruche, pas une commande spéciale
+- "dadant/langstroth/voirnot/ruchette/nucléus" = modèle de ruche, mettre dans notes
+- REINE DANS RUCHE → mettre à jour update_ruche avec champs reine + typeRuche:"Pleine"
+- RUCHE VIDE = sans reine (typeRuche:"Vide"). RUCHE PLEINE = avec reine et colonie (typeRuche:"Pleine")
+- CRÉATION EN MASSE : si l'utilisateur dit "créer X ruches/ruchettes/nucléus", générer X entrées dans le batch avec numéros consécutifs
+- Pour la numérotation, utiliser le format demandé ou JQ-XXX par défaut, en partant du prochain numéro disponible
 - Accepte fautes d'accent : "ruche" peut être "reuch", "excellent" peut être "excellan"
 - Si plusieurs ruches mentionnées → plusieurs actions update_ruche
 - Si tu ne comprends pas → {"message":"Je n'ai pas bien compris, pouvez-vous reformuler ?","actions":[]}
@@ -416,13 +433,48 @@ function appliquerAction(action){
       var r=APP.ruches.find(function(x){
         return x.numero&&x.numero.toUpperCase()===((action.numero||"").toUpperCase());
       });
-      if(r){Object.assign(r,action.champs);return "Ruche "+r.numero+" mise à jour";}
+      if(r){
+        Object.assign(r,action.champs);
+        // Reine présente = Pleine automatiquement
+        if(r.reine && r.reine.trim() !== "" && (r.typeRuche==="Vide"||r.typeRuche==="Nucléus"||r.typeRuche==="Ruchette")){
+          r.typeRuche="Pleine";
+        }
+        // Reine retirée = Vide automatiquement  
+        if(action.champs.reine === "" || action.champs.reine === null){
+          r.typeRuche="Vide";
+        }
+        return "Ruche "+r.numero+" mise à jour"+(r.reine?" → Pleine (reine présente)":"");
+      }
       return "Ruche "+action.numero+" non trouvée";
 
     case "add_ruche":
+      // Création en masse si batch fourni
+      if(action.batch && action.batch.length > 0){
+        var added=0;
+        action.batch.forEach(function(ruche){
+          ruche.id=genId();
+          // Reine présente = Pleine automatiquement
+          if(ruche.reine && ruche.reine.trim() !== "") ruche.typeRuche="Pleine";
+          APP.ruches.push(ruche);
+          added++;
+        });
+        return added+" ruche(s) ajoutée(s)";
+      }
       action.data.id=genId();
+      if(action.data.reine && action.data.reine.trim() !== "") action.data.typeRuche="Pleine";
       APP.ruches.push(action.data);
       return "Ruche "+action.data.numero+" ajoutée";
+
+    case "add_ruches_batch":
+      // Alias pour création en masse
+      var added=0;
+      (action.batch||[]).forEach(function(ruche){
+        ruche.id=genId();
+        if(ruche.reine && ruche.reine.trim() !== "") ruche.typeRuche="Pleine";
+        APP.ruches.push(ruche);
+        added++;
+      });
+      return added+" ruche(s) créée(s)";
 
     case "update_reine":
       var reine=APP.reines.find(function(x){
