@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="theme-color" content="#1C1208"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>j &amp; j — Les Ruchers de Séguéla</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --gold:#E8A800;--amber:#F5C842;--dark:#1C1208;--brown:#3D1F00;
+  --cream:#FDF6E3;--green:#4A7C3F;--red:#C0392B;--orange:#C96A00;
+  --blue:#2980B9;--purple:#8b5cf6;--sb:env(safe-area-inset-bottom,0px)
+}
+html,body{height:100%;overflow:hidden;font-family:Georgia,serif;background:var(--dark)}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;background:var(--cream)}
+.hdr{background:var(--dark);padding:9px 13px;border-bottom:3px solid var(--gold);display:flex;align-items:center;gap:9px;flex-shrink:0}
+.jj{font-size:17px;font-weight:bold;color:var(--gold);letter-spacing:2px}
+.sub{font-size:7px;color:var(--amber);letter-spacing:1px;text-transform:uppercase}
+.mic-btn{margin-left:auto;width:42px;height:42px;border-radius:50%;border:none;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--red);color:white;transition:all .2s}
+.mic-btn.ecoute{background:#ff3b30;animation:pulse .8s infinite;transform:scale(1.1)}
+.mic-btn.traite{background:var(--purple)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,59,48,.4)}50%{box-shadow:0 0 0 8px rgba(255,59,48,0)}}
+.page{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:11px;padding-bottom:calc(72px + var(--sb))}
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--dark);border-top:2px solid var(--gold);display:flex;padding-bottom:var(--sb);z-index:50;overflow-x:auto}
+.ntab{flex:1;min-width:46px;padding:7px 2px 5px;border:none;background:transparent;color:#777;font-size:7px;text-transform:uppercase;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:Georgia,serif}
+.ntab.on{color:var(--gold)}
+.nicon{font-size:16px}
+.card{background:white;border-radius:10px;padding:11px;margin-bottom:9px;box-shadow:0 2px 6px rgba(0,0,0,.07);border-left:4px solid var(--gold)}
+.stitle{font-size:15px;color:var(--brown);font-weight:bold;margin-bottom:9px}
+.btn{border:none;border-radius:8px;padding:8px 13px;font-size:12px;font-family:Georgia,serif;cursor:pointer;font-weight:bold}
+.full{width:100%;text-align:center;display:block;margin-bottom:9px}
+.inp{padding:8px 10px;border-radius:8px;border:1.5px solid #e0d5c0;font-family:Georgia,serif;font-size:12px;background:white;color:var(--dark);outline:none;width:100%;margin-bottom:8px}
+.inp:focus{border-color:var(--gold)}
+select.inp{-webkit-appearance:none}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:bold}
+.stat-row{display:flex;gap:7px;margin-bottom:11px;overflow-x:auto;padding-bottom:2px}
+.stat-box{flex-shrink:0;background:white;border-radius:9px;padding:9px 12px;text-align:center;min-width:64px;box-shadow:0 2px 5px rgba(0,0,0,.06);cursor:pointer}
+.stat-nb{font-size:19px;font-weight:bold;color:var(--dark)}
+.stat-lb{font-size:7px;color:#888;text-transform:uppercase;letter-spacing:.4px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:flex;align-items:flex-end}
+.modal{background:white;border-radius:18px 18px 0 0;padding:16px;padding-bottom:calc(16px + var(--sb));width:100%;max-height:90vh;overflow-y:auto}
+.modal-titre{font-size:14px;font-weight:bold;color:var(--brown);margin-bottom:13px;text-align:center}
+.hidden{display:none!important}
+.fab{position:fixed;bottom:calc(72px + var(--sb) + 11px);right:13px;width:48px;height:48px;border-radius:50%;background:var(--gold);border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.3);z-index:40;line-height:48px;text-align:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px}
+.info-r{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0ebe0;font-size:12px}
+.info-r:last-child{border-bottom:none}
+.info-k{color:#888}.info-v{font-weight:bold;color:var(--dark);text-align:right}
+.dot{width:11px;height:6px;border-radius:3px;display:inline-block}
+.dot-row{display:flex;gap:2px}
+.subtabs{display:flex;gap:5px;margin-bottom:10px;background:#f5ede0;border-radius:10px;padding:4px}
+.stab{flex:1;padding:7px;border:none;border-radius:8px;background:transparent;font-family:Georgia,serif;font-size:11px;font-weight:bold;color:#888;cursor:pointer;text-align:center}
+.stab.on{background:white;color:var(--brown);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.alert-box{background:#fff3cd;border-left:4px solid #ffc107;border-radius:8px;padding:9px 11px;margin-bottom:8px;font-size:12px}
+.stock-item{background:white;border-radius:9px;padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.qty-btn{background:#f0ebe0;border:none;border-radius:6px;width:30px;height:30px;font-size:18px;cursor:pointer;line-height:30px;text-align:center}
+/* VOIX OVERLAY */
+.voice-overlay{position:fixed;inset:0;background:rgba(28,18,8,.96);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px}
+.voice-onde{width:100px;height:100px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:20px}
+.voice-onde.anim{animation:onde 1s infinite}
+@keyframes onde{0%{box-shadow:0 0 0 0 rgba(255,59,48,.5)}100%{box-shadow:0 0 0 30px rgba(255,59,48,0)}}
+.voice-onde.ia{background:var(--purple)}
+.voice-onde.ia.anim{animation:ondeIA 1s infinite}
+@keyframes ondeIA{0%{box-shadow:0 0 0 0 rgba(139,92,246,.5)}100%{box-shadow:0 0 0 30px rgba(139,92,246,0)}}
+.voice-titre{font-size:18px;color:white;font-weight:bold;margin-bottom:10px;text-align:center}
+.voice-retranscrit{font-size:13px;color:#ccc;font-style:italic;text-align:center;min-height:20px;margin-bottom:12px;max-width:300px;line-height:1.5}
+.voice-resultat{background:rgba(255,255,255,.08);border-radius:12px;padding:14px;width:100%;max-width:340px;margin-bottom:14px}
+.voice-resultat-msg{font-size:13px;color:var(--amber);font-weight:bold;margin-bottom:8px;text-align:center}
+.voice-action{font-size:11px;color:#aaa;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.1)}
+.voice-action:last-child{border-bottom:none}
+.voice-action.ok{color:var(--green)}
+.voice-stop{background:rgba(255,255,255,.15);border:none;border-radius:12px;padding:12px 30px;color:white;font-family:Georgia,serif;font-size:13px;cursor:pointer;margin-top:6px}
+/* TOAST */
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:var(--green);color:white;padding:8px 20px;border-radius:20px;font-size:11px;font-family:Georgia,serif;z-index:600;white-space:nowrap;animation:toastIn .3s ease}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.toast.err{background:var(--red)}
+/* ACCUEIL RACCOURCIS */
+.shortcut-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.shortcut{background:white;border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.07);border:2px solid transparent;transition:border-color .2s}
+.shortcut:active{border-color:var(--gold)}
+.shortcut-ic{font-size:24px;margin-bottom:4px}
+.shortcut-lb{font-size:10px;color:var(--brown);font-weight:bold}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="hdr">
+    <svg width="32" height="32" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="48" fill="#E8A800"/>
+      <ellipse cx="50" cy="53" rx="13" ry="18" fill="#1C1208"/>
+      <rect x="38" y="48" width="24" height="4" rx="2" fill="#F5C842" opacity=".7"/>
+      <rect x="38" y="56" width="24" height="4" rx="2" fill="#F5C842" opacity=".7"/>
+      <ellipse cx="35" cy="44" rx="10" ry="6" fill="white" opacity=".5" transform="rotate(-20 35 44)"/>
+      <ellipse cx="65" cy="44" rx="10" ry="6" fill="white" opacity=".5" transform="rotate(20 65 44)"/>
+    </svg>
+    <div><div class="jj">j & j</div><div class="sub">Les Ruchers de Séguéla</div></div>
+    <button class="mic-btn" id="mic-btn" onclick="demarrerVoix()" title="Dicter">🎙️</button>
+  </header>
+  <div class="page" id="page"></div>
+  <button class="fab" id="fab" onclick="fabAction()">+</button>
+  <nav class="nav" id="nav"></nav>
+</div>
+
+<!-- VOIX OVERLAY -->
+<div class="voice-overlay hidden" id="voice-overlay">
+  <div class="voice-onde" id="voice-onde">🎙️</div>
+  <div class="voice-titre" id="voice-titre">Parlez maintenant</div>
+  <div class="voice-retranscrit" id="voice-retranscrit"></div>
+  <div class="voice-resultat hidden" id="voice-resultat">
+    <div class="voice-resultat-msg" id="voice-msg"></div>
+    <div id="voice-actions"></div>
+  </div>
+  <button class="voice-stop" onclick="fermerVoix()">✕ Fermer</button>
+</div>
+
+<!-- MODAL -->
+<div class="overlay hidden" id="overlay" onclick="if(event.target===this)fermerModal()">
+  <div class="modal" id="modal">
+    <div class="modal-titre" id="modal-titre"></div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// CONSTANTES
+// ════════════════════════════════════════════════════════
+var MOIS=["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
+var ETATS_RUCHE=["Excellent","Bon","Moyen","Faible","Mort"];
+var MALADIES=["Aucune","Varroa faible","Varroa élevé","Nosema","Loque","Autre"];
+var TYPES_RUCHE=["Pleine","Vide","Nucléus","Ruchette"];
+var STATUTS_TRANSH=["Prospection","Contacté","En cours","Autorisé","Refusé"];
+var STATUTS_REINE=["Élevage","Cellule royale","Vierge","Fécondée","Pondeuse","Remplacée","Morte"];
+
+var RUCHERS_INIT=[
+  {id:1,nom:"Rucher Jacques",adresse:"Villemur-sur-Tarn",lat:43.8735,lng:1.4992,couleur:"#E8A800",tel:"06 08 04 57 38"},
+  {id:2,nom:"Rucher Julien",adresse:"Séguéla, Génébrières 82230",lat:43.9480,lng:1.6820,couleur:"#4A7C3F",tel:"07 76 08 22 08"},
+  {id:3,nom:"Rucher Jean-Marc",adresse:"43.9942, 1.5128",lat:43.9942,lng:1.5128,couleur:"#8b5cf6",tel:""},
+  {id:4,nom:"Rucher Chapelle",adresse:"43.9547, 1.6816",lat:43.9547,lng:1.6816,couleur:"#C0392B",tel:""},
+  {id:5,nom:"Rucher Manoir",adresse:"43.9480, 1.6798",lat:43.9480,lng:1.6798,couleur:"#1ABC9C",tel:""},
+  {id:6,nom:"Rucher Oliveiro",adresse:"43.9507, 1.6729",lat:43.9507,lng:1.6729,couleur:"#F39C12",tel:""},
+  {id:7,nom:"Rucher Cepet",adresse:"43.7752, 1.4346",lat:43.7752,lng:1.4346,couleur:"#2980B9",tel:""},
+  {id:8,nom:"Rucher Catherine Caylus",adresse:"44.2500, 1.7759",lat:44.2499,lng:1.7759,couleur:"#E91E8C",tel:""}
+];
+var TRANSH_INIT=[
+  {id:1,nom:"Forêt de Grésigne",commune:"Castelnau-de-Montmiral",miellees:["Tilleul","Acacia"],statut:"Prospection",distance:60,type:"ONF",contact:"",tel:"05 63 48 04 50",mois_debut:4,mois_fin:6,nb_ruches:20,notes:"Forêt domaniale — ONF Tarn",lat:44.0303,lng:1.7621},
+  {id:2,nom:"Quercy Blanc",commune:"Montcuq",miellees:["Acacia","Polyfloral"],statut:"Prospection",distance:80,type:"Mairie",contact:"",tel:"",mois_debut:4,mois_fin:5,nb_ruches:15,notes:"Zone peu saturée",lat:44.3352,lng:1.2102},
+  {id:3,nom:"Sidobre / Lacaune",commune:"Lacaune",miellees:["Châtaignier"],statut:"Prospection",distance:80,type:"Privé",contact:"",tel:"",mois_debut:6,mois_fin:7,nb_ruches:25,notes:"CRPF Occitanie",lat:43.7200,lng:2.5800},
+  {id:4,nom:"Montagne Noire",commune:"Mazamet",miellees:["Châtaignier","Bruyère"],statut:"Prospection",distance:90,type:"ONF",contact:"",tel:"04 67 67 00 00",mois_debut:7,mois_fin:8,nb_ruches:20,notes:"Double miellée",lat:43.4700,lng:2.2800}
+];
+var REINES_INIT=(function(){
+  var r=[];
+  function a(id,num,gref,elev,mere,ruche,greffe){r.push({id:id,numero:num,greffage:gref,elevage:elev,mere:mere,ligne:"Buckfast",ruche:ruche,dateGreffe:greffe,dateNee:null,dateFeco:null,datePonte:null,statut:"Cellule royale",notes:"",productivite:null});}
+  for(var i=1;i<=18;i++) a(i,"R2026-D"+String(i).padStart(2,"0"),"G1-Delanoy F1","Delanoy F1","Souche Delanoy F1","NUC-D"+String(i).padStart(2,"0"),"2026-04-05");
+  for(var i=19;i<=32;i++) a(i,"R2026-D"+String(i).padStart(2,"0"),"G1-Delanoy F3","Delanoy F3","Delanoy F3 (nat. F2)","NUC-D"+String(i).padStart(2,"0"),"2026-04-05");
+  for(var i=1;i<=27;i++) a(100+i,"R2026-Y"+String(i).padStart(2,"0"),"G2-Yann F1","Yann F1","Souche Yann F1","NUC-Y"+String(i).padStart(2,"0"),"2026-04-09");
+  a(160,"R2026-D33","G3-Delanoy F1","Delanoy F1","Souche Delanoy F1","NUC-D33","2026-04-11");
+  a(161,"R2026-D34","G3-Delanoy F1","Delanoy F1","Souche Delanoy F1","NUC-D34","2026-04-11");
+  for(var i=29;i<=54;i++) a(200+i,"R2026-Y"+String(i).padStart(2,"0"),"G4-Yann F1","Yann F1","Souche Yann F1","NUC-Y"+String(i).padStart(2,"0"),"2026-04-19");
+  return r;
+})();
+var STOCK_INIT=[
+  {id:1,categorie:"Ruches",label:"Corps de ruche vides",qte:0,unite:"unités"},
+  {id:2,categorie:"Ruches",label:"Hausses",qte:0,unite:"unités"},
+  {id:3,categorie:"Ruches",label:"Nucléus vides",qte:0,unite:"unités"},
+  {id:4,categorie:"Ruches",label:"Ruchettes vides",qte:0,unite:"unités"},
+  {id:5,categorie:"Cadres",label:"Cadres cire gaufrée",qte:0,unite:"unités"},
+  {id:6,categorie:"Cadres",label:"Cadres bâtis",qte:0,unite:"unités"},
+  {id:7,categorie:"Traitement",label:"Acide oxalique",qte:0,unite:"flacons"},
+  {id:8,categorie:"Traitement",label:"Apivar / Apistan",qte:0,unite:"bandelettes"},
+  {id:9,categorie:"Conditionnement",label:"Pots 500g vides",qte:0,unite:"unités"},
+  {id:10,categorie:"Conditionnement",label:"Pots 250g vides",qte:0,unite:"unités"},
+  {id:11,categorie:"Conditionnement",label:"Couvercles",qte:0,unite:"unités"}
+];
+
+// ════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════
+function load(k,def){try{var v=localStorage.getItem(k);return v?JSON.parse(v):def;}catch(e){return def;}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+var APP={
+  vue:"accueil",subvue:"pleines",
+  ruches:   load("jj_ruches",   []),
+  ruchers:  load("jj_ruchers",  RUCHERS_INIT),
+  reines:   load("jj_reines",   REINES_INIT),
+  transh:   load("jj_transh",   TRANSH_INIT),
+  stocks:   load("jj_stocks",   []),
+  stockMat: load("jj_stockMat", STOCK_INIT),
+  ventes:   load("jj_ventes",   []),
+  depenses: load("jj_depenses", []),
+  journal:  load("jj_journal",  [])
+};
+function sauverTout(){save("jj_ruches",APP.ruches);save("jj_ruchers",APP.ruchers);save("jj_reines",APP.reines);save("jj_transh",APP.transh);save("jj_stocks",APP.stocks);save("jj_stockMat",APP.stockMat);save("jj_ventes",APP.ventes);save("jj_depenses",APP.depenses);save("jj_journal",APP.journal);}
+
+// ════════════════════════════════════════════════════════
+// UTILITAIRES
+// ════════════════════════════════════════════════════════
+function jours(d){return d?Math.floor((new Date()-new Date(d))/86400000):999;}
+function fmt(d){return d?new Date(d).toLocaleDateString("fr-FR"):"—";}
+function today(){return new Date().toISOString().slice(0,10);}
+function genId(){return Date.now()+Math.floor(Math.random()*999);}
+function etatColor(e){return{Excellent:"#4A7C3F",Bon:"#7BAE6E",Moyen:"#C96A00",Faible:"#C0392B",Mort:"#555"}[e]||"#999";}
+function statutReineColor(s){return{"Élevage":"#f59e0b","Cellule royale":"#8b5cf6","Vierge":"#ec4899","Fécondée":"#10b981","Pondeuse":"#22c55e","Remplacée":"#6b7280","Morte":"#ef4444"}[s]||"#aaa";}
+function statutTranshColor(s){return{Prospection:"#aaa",Contacté:"#2980B9","En cours":"#C96A00",Autorisé:"#4A7C3F",Refusé:"#C0392B"}[s]||"#aaa";}
+function dots(val,max,color){var h="<div class='dot-row'>";for(var i=0;i<(max||5);i++)h+="<div class='dot' style='background:"+(i<val?color:"#e5e7eb")+"'></div>";return h+"</div>";}
+function badge(txt,color){return "<span class='badge' style='background:"+color+"22;color:"+color+"'>"+txt+"</span>";}
+function ruchesPleines(){return APP.ruches.filter(function(r){return !r.typeRuche||r.typeRuche==="Pleine";});}
+function ruchesVides(){return APP.ruches.filter(function(r){return r.typeRuche==="Vide"||r.typeRuche==="Nucléus"||r.typeRuche==="Ruchette";});}
+function toast(msg,err){var t=document.createElement("div");t.className="toast"+(err?" err":"");t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove();},2500);}
+
+// ════════════════════════════════════════════════════════
+// MODAL
+// ════════════════════════════════════════════════════════
+function ouvrirModal(titre,html){document.getElementById("modal-titre").textContent=titre;document.getElementById("modal-body").innerHTML=html;document.getElementById("overlay").classList.remove("hidden");}
+function fermerModal(){document.getElementById("overlay").classList.add("hidden");}
+
+// ════════════════════════════════════════════════════════
+// SYSTÈME VOCAL IA
+// ════════════════════════════════════════════════════════
+var recog=null;
+
+function demarrerVoix(){
+  if(!('webkitSpeechRecognition'in window)&&!('SpeechRecognition'in window)){
+    alert("Utilise Chrome sur Android pour la reconnaissance vocale.");return;
+  }
+  // Ouvrir overlay
+  document.getElementById("voice-overlay").classList.remove("hidden");
+  document.getElementById("voice-onde").className="voice-onde anim";
+  document.getElementById("voice-titre").textContent="Parlez maintenant…";
+  document.getElementById("voice-retranscrit").textContent="";
+  document.getElementById("voice-resultat").classList.add("hidden");
+  document.getElementById("voice-msg").textContent="";
+  document.getElementById("voice-actions").innerHTML="";
+  document.getElementById("mic-btn").className="mic-btn ecoute";
+
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recog=new SR();
+  recog.lang="fr-FR";recog.continuous=false;recog.interimResults=true;
+
+  recog.onresult=function(e){
+    var txt="",final=false;
+    for(var i=e.resultIndex;i<e.results.length;i++){
+      txt+=e.results[i][0].transcript;
+      if(e.results[i].isFinal)final=true;
+    }
+    document.getElementById("voice-retranscrit").textContent='"'+txt+'"';
+    if(final){
+      recog.stop();
+      envoyerAIA(txt);
+    }
+  };
+  recog.onerror=function(e){
+    document.getElementById("voice-titre").textContent="Erreur: "+e.error;
+    document.getElementById("mic-btn").className="mic-btn";
+    setTimeout(fermerVoix,2000);
+  };
+  recog.start();
+}
+
+function fermerVoix(){
+  if(recog){try{recog.stop();}catch(e){}}
+  recog=null;
+  document.getElementById("voice-overlay").classList.add("hidden");
+  document.getElementById("mic-btn").className="mic-btn";
+}
+
+async function envoyerAIA(texte){
+  // Changer l'overlay en mode traitement
+  document.getElementById("voice-onde").className="voice-onde ia anim";
+  document.getElementById("voice-titre").textContent="Claude analyse…";
+  document.getElementById("mic-btn").className="mic-btn traite";
+
+  // Préparer le contexte de l'app
+  var contexte={
+    ruchers:APP.ruchers.map(function(r){return{id:r.id,nom:r.nom};}),
+    ruches:APP.ruches.map(function(r){return{id:r.id,numero:r.numero,typeRuche:r.typeRuche||"Pleine",rucher:r.rucher,etat:r.etat};}),
+    reines:APP.reines.slice(0,20).map(function(r){return{id:r.id,numero:r.numero,statut:r.statut,elevage:r.elevage};}),
+    nbReines:APP.reines.length
+  };
+
+  var systemPrompt=`Tu es l'assistant apicole de J & J Les Ruchers de Séguéla (Julien Méry & Jacques Didot, Génébrières 82230, Occitanie). Race exclusive : Buckfast. Types de ruches : Dadant, Langstroth, Voirnot.
+
+DONNÉES ACTUELLES :
+Ruchers : ${APP.ruchers.map(function(r){return r.nom;}).join(", ")}
+Ruches enregistrées : ${APP.ruches.length} (${ruchesPleines().length} pleines, ${ruchesVides().length} vides)
+Numéros de ruches : ${APP.ruches.slice(0,30).map(function(r){return r.numero;}).join(", ")}${APP.ruches.length>30?"...":""}
+Reines : ${APP.reines.length} (statuts: ${(function(){var s={};APP.reines.forEach(function(r){s[r.statut]=(s[r.statut]||0)+1;});return Object.entries(s).map(function(e){return e[0]+":"+e[1];}).join(", ");})()})
+
+DATE AUJOURD'HUI : ${today()}
+
+Tu dois analyser le message vocal (avec accent toulousain possible, erreurs de diction possibles) et retourner UNIQUEMENT un objet JSON valide :
+{
+  "message": "Confirmation en français de ce qui a été fait",
+  "actions": []
+}
+
+TYPES D'ACTIONS :
+1. update_ruche: {"type":"update_ruche","numero":"JQ-001","champs":{"etat":"Excellent","insp":"${today()}","pop":4,"mel":3,"mal":"Aucune","reine":"2026","race":"Buckfast","notes":"...","typeRuche":"Pleine"}}
+2. add_ruche: {"type":"add_ruche","data":{"numero":"JQ-050","typeRuche":"Pleine","rucher":"Rucher Jacques","etat":"Bon","pop":3,"mel":3,"mal":"Aucune","insp":"${today()}","reine":"","race":"Buckfast","notes":""}}
+3. update_reine: {"type":"update_reine","numero":"R2026-D01","champs":{"statut":"Vierge","dateNee":"${today()}"}}
+4. add_journal: {"type":"add_journal","data":{"titre":"Visite rucher","texte":"...","rucher":"Rucher Jacques","date":"${today()}"}}
+5. add_stock_miel: {"type":"add_stock_miel","data":{"type":"Colza","poids":12.5,"rucher":"Rucher Jacques","date":"${today()}","notes":""}}
+6. add_vente: {"type":"add_vente","data":{"produit":"Miel colza 500g","montant":25,"client":"","date":"${today()}","notes":""}}
+7. update_stock_mat: {"type":"update_stock_mat","label":"Hausses","delta":5}
+8. navigate: {"type":"navigate","vue":"ruches"}
+
+VALEURS VALIDES :
+- etat: Excellent, Bon, Moyen, Faible, Mort
+- mal: Aucune, Varroa faible, Varroa élevé, Nosema, Loque, Autre
+- typeRuche: Pleine, Vide, Nucléus, Ruchette
+- statut_reine: Élevage, Cellule royale, Vierge, Fécondée, Pondeuse, Remplacée, Morte
+- vue: accueil, ruches, stock, miel, reines, transh, compta, journal, alertes
+
+RÈGLES :
+- "inspecté/visité" sans date = aujourd'hui
+- "reine pond bien" → statut Pondeuse + datePonte aujourd'hui
+- "née/éclose" → statut Vierge + dateNee aujourd'hui
+- "essaimé" → noter dans notes ET créer entrée journal
+- "dadant/langstroth/voirnot" = type de ruche, pas une commande spéciale
+- Accepte fautes d'accent : "ruche" peut être "reuch", "excellent" peut être "excellan"
+- Si plusieurs ruches mentionnées → plusieurs actions update_ruche
+- Si tu ne comprends pas → {"message":"Je n'ai pas bien compris, pouvez-vous reformuler ?","actions":[]}
+- TOUJOURS retourner du JSON valide uniquement, jamais de texte libre`;
+
+  try {
+    var response=await fetch("/.netlify/functions/chat",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        system:systemPrompt,
+        messages:[{role:"user",content:texte}]
+      })
+    });
+
+    var data=await response.json();
+    var txtReponse=data.content&&data.content[0]?data.content[0].text:"";
+
+    // Parser le JSON
+    var json;
+    try{
+      var clean=txtReponse.replace(/```json|```/g,"").trim();
+      json=JSON.parse(clean);
+    }catch(e){
+      json={message:"Réponse non parsable : "+txtReponse.substring(0,100),actions:[]};
+    }
+
+    // Afficher le résultat
+    document.getElementById("voice-onde").className="voice-onde ia";
+    document.getElementById("voice-onde").textContent="✅";
+    document.getElementById("voice-titre").textContent="Terminé";
+    document.getElementById("voice-msg").textContent=json.message||"";
+    document.getElementById("voice-resultat").classList.remove("hidden");
+
+    // Appliquer les actions
+    var actionsHtml="";
+    if(json.actions&&json.actions.length){
+      json.actions.forEach(function(action){
+        var res=appliquerAction(action);
+        actionsHtml+='<div class="voice-action ok">✓ '+res+'</div>';
+      });
+      sauverTout();
+      render();
+    } else {
+      actionsHtml='<div class="voice-action">Aucune modification</div>';
+    }
+    document.getElementById("voice-actions").innerHTML=actionsHtml;
+    document.getElementById("mic-btn").className="mic-btn";
+
+  } catch(err){
+    document.getElementById("voice-titre").textContent="Erreur connexion";
+    document.getElementById("voice-msg").textContent=err.message;
+    document.getElementById("voice-resultat").classList.remove("hidden");
+    document.getElementById("mic-btn").className="mic-btn";
+  }
+}
+
+// ── APPLIQUER UNE ACTION JSON ──────────────────────────────
+function appliquerAction(action){
+  switch(action.type){
+    case "update_ruche":
+      var r=APP.ruches.find(function(x){
+        return x.numero&&x.numero.toUpperCase()===((action.numero||"").toUpperCase());
+      });
+      if(r){Object.assign(r,action.champs);return "Ruche "+r.numero+" mise à jour";}
+      return "Ruche "+action.numero+" non trouvée";
+
+    case "add_ruche":
+      action.data.id=genId();
+      APP.ruches.push(action.data);
+      return "Ruche "+action.data.numero+" ajoutée";
+
+    case "update_reine":
+      var reine=APP.reines.find(function(x){
+        return x.numero&&x.numero.toUpperCase()===((action.numero||"").toUpperCase());
+      });
+      if(reine){Object.assign(reine,action.champs);return "Reine "+reine.numero+" mise à jour";}
+      return "Reine "+action.numero+" non trouvée";
+
+    case "add_journal":
+      action.data.id=genId();
+      APP.journal.push(action.data);
+      return "Note ajoutée : "+action.data.titre;
+
+    case "add_stock_miel":
+      action.data.id=genId();
+      APP.stocks.push(action.data);
+      return "Récolte "+action.data.poids+"kg ajoutée";
+
+    case "add_vente":
+      action.data.id=genId();
+      APP.ventes.push(action.data);
+      return "Vente "+action.data.montant+"€ enregistrée";
+
+    case "update_stock_mat":
+      var item=APP.stockMat.find(function(x){return x.label.toLowerCase().includes((action.label||"").toLowerCase());});
+      if(item){item.qte=Math.max(0,(item.qte||0)+(action.delta||0));return item.label+" → "+item.qte;}
+      return "Article non trouvé: "+action.label;
+
+    case "navigate":
+      APP.vue=action.vue||"accueil";
+      return "Navigation → "+action.vue;
+
+    default:
+      return "Action inconnue: "+action.type;
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// VUE ACCUEIL
+// ════════════════════════════════════════════════════════
+function vueAccueil(){
+  var pleines=ruchesPleines().length,vides=ruchesVides().length;
+  var urg=APP.ruches.filter(function(r){return jours(r.insp)>14||(r.mal&&r.mal!=="Aucune")||r.etat==="Faible";}).length;
+  var totMiel=APP.stocks.reduce(function(a,s){return a+(s.poids||0);},0);
+  var ca=APP.ventes.reduce(function(a,v){return a+(v.montant||0);},0);
+
+  var h='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
+  h+='<div class="stitle" style="margin-bottom:0">Tableau de bord</div>';
+  h+='<button onclick="demarrerVoix()" style="background:var(--red);border:none;border-radius:20px;color:white;padding:8px 16px;font-family:Georgia,serif;font-size:12px;cursor:pointer;font-weight:bold">🎙️ Dicter</button>';
+  h+='</div>';
+
+  // Stats cliquables
+  h+='<div class="stat-row">';
+  h+='<div class="stat-box" onclick="APP.vue=\'ruches\';APP.subvue=\'pleines\';render()"><div class="stat-nb">'+pleines+'</div><div class="stat-lb">🐝 Pleines</div></div>';
+  h+='<div class="stat-box" onclick="APP.vue=\'ruches\';APP.subvue=\'vides\';render()"><div class="stat-nb" style="color:#888">'+vides+'</div><div class="stat-lb">📦 Vides</div></div>';
+  h+='<div class="stat-box" onclick="APP.vue=\'alertes\';render()"><div class="stat-nb" style="color:var(--red)">'+urg+'</div><div class="stat-lb">⚠️ Alertes</div></div>';
+  h+='<div class="stat-box" onclick="APP.vue=\'reines\';render()"><div class="stat-nb" style="color:#8b5cf6">'+APP.reines.length+'</div><div class="stat-lb">👑 Reines</div></div>';
+  h+='<div class="stat-box" onclick="APP.vue=\'miel\';render()"><div class="stat-nb" style="color:var(--gold)">'+totMiel+'kg</div><div class="stat-lb">🪣 Miel</div></div>';
+  h+='<div class="stat-box" onclick="APP.vue=\'compta\';render()"><div class="stat-nb" style="color:var(--green)">'+ca+'€</div><div class="stat-lb">💰 CA</div></div>';
+  h+='</div>';
+
+  if(urg>0) h+='<div class="alert-box" style="cursor:pointer" onclick="APP.vue=\'alertes\';render()">⚠️ <strong>'+urg+' ruche(s)</strong> à inspecter — Appuyer pour voir</div>';
+
+  // Raccourcis onglets
+  h+='<div class="stitle">Accès rapide</div>';
+  h+='<div class="shortcut-grid">';
+  var onglets=[
+    {ic:"🐝",lb:"Ruches",vue:"ruches"},{ic:"📦",lb:"Stock",vue:"stock"},
+    {ic:"🪣",lb:"Miellerie",vue:"miel"},{ic:"👑",lb:"Reines",vue:"reines"},
+    {ic:"🚐",lb:"Transh.",vue:"transh"},{ic:"💰",lb:"Compta",vue:"compta"},
+    {ic:"🗺️",lb:"Ruchers",vue:"carte"},{ic:"📖",lb:"Journal",vue:"journal"},
+    {ic:"⚠️",lb:"Alertes",vue:"alertes"}
+  ];
+  onglets.forEach(function(o){
+    h+='<div class="shortcut" onclick="APP.vue=\''+o.vue+'\';render()">';
+    h+='<div class="shortcut-ic">'+o.ic+'</div>';
+    h+='<div class="shortcut-lb">'+o.lb+'</div></div>';
+  });
+  h+='</div>';
+
+  // Dernières notes de journal
+  if(APP.journal.length){
+    h+='<div class="stitle">📖 Dernières notes</div>';
+    APP.journal.slice(-3).reverse().forEach(function(j){
+      h+='<div class="card" style="padding:9px;cursor:pointer" onclick="APP.vue=\'journal\';render()">';
+      h+='<div style="display:flex;justify-content:space-between"><strong style="font-size:12px">'+j.titre+'</strong><span style="font-size:9px;color:#aaa">'+fmt(j.date)+'</span></div>';
+      h+='<div style="font-size:11px;color:#666;margin-top:2px">'+j.texte.substring(0,80)+(j.texte.length>80?"...":"")+'</div>';
+      h+='</div>';
+    });
+  }
+  return h;
+}
+
+// ════════════════════════════════════════════════════════
+// VUE RUCHES
+// ════════════════════════════════════════════════════════
+function vueRuches(){
+  var pleines=ruchesPleines(),vides=ruchesVides();
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+  h+='<div class="stitle" style="margin-bottom:0">🐝 Ruches</div>';
+  h+='<button class="btn" style="background:var(--gold);color:var(--dark);font-size:11px" onclick="formRuche(null)">+ Nouvelle</button>';
+  h+='</div>';
+  h+='<div class="subtabs">';
+  h+='<button class="stab'+(APP.subvue==="pleines"?" on":"")+'" onclick="APP.subvue=\'pleines\';render()">🐝 Pleines ('+pleines.length+')</button>';
+  h+='<button class="stab'+(APP.subvue==="vides"?" on":"")+'" onclick="APP.subvue=\'vides\';render()">📦 Vides ('+vides.length+')</button>';
+  h+='</div>';
+  return h+renderListeRuches(APP.subvue==="pleines"?pleines:vides);
+}
+
+function renderListeRuches(liste){
+  if(!liste.length){
+    return'<div class="card" style="text-align:center;color:#aaa;padding:20px">Aucune ruche<br><br><button class="btn" style="background:var(--gold);color:var(--dark)" onclick="formRuche(null)">+ Ajouter</button></div>';
+  }
+  var h="";
+  var urg=liste.filter(function(r){return jours(r.insp)>14||(r.mal&&r.mal!=="Aucune")||r.etat==="Faible";});
+  if(urg.length) h+='<div class="alert-box">⚠️ '+urg.length+' ruche(s) en alerte</div>';
+  APP.ruchers.forEach(function(rucher){
+    var du=liste.filter(function(r){return r.rucher===rucher.nom;});
+    if(!du.length)return;
+    h+='<div style="font-size:11px;font-weight:bold;color:'+rucher.couleur+';margin:9px 0 5px">📍 '+rucher.nom+' ('+du.length+')</div>';
+    du.forEach(function(r){
+      var col=etatColor(r.etat||"Bon");
+      h+='<div class="card" style="border-left-color:'+col+';padding:9px;cursor:pointer" onclick="detailRuche('+r.id+')">';
+      h+='<div style="display:flex;justify-content:space-between;align-items:center">';
+      h+='<div><strong style="font-size:13px">'+r.numero+'</strong>';
+      if(r.reine) h+=' <span style="font-size:9px;color:#888">👑'+r.reine+'</span>';
+      h+='</div>'+badge(r.etat||"Bon",col)+'</div>';
+      h+='<div style="display:flex;gap:10px;margin-top:4px">';
+      h+='<span style="font-size:9px">'+dots(r.pop||0,5,"#4A7C3F")+'</span>';
+      h+='<span style="font-size:9px">'+dots(r.mel||0,5,"#E8A800")+'</span>';
+      h+='</div>';
+      if(r.mal&&r.mal!=="Aucune") h+='<div style="font-size:9px;color:var(--red);margin-top:3px">🦠 '+r.mal+'</div>';
+      var j=jours(r.insp);
+      h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">';
+      h+='<span style="font-size:9px;color:'+(j>14?"var(--red)":"#aaa")+'">⏰ '+(r.insp?fmt(r.insp)+' ('+j+'j)':"Non inspectée")+'</span>';
+      h+='<button class="btn" style="background:var(--gold);color:var(--dark);font-size:9px;padding:3px 8px" onclick="event.stopPropagation();inspRapide('+r.id+')">✓</button>';
+      h+='</div></div>';
+    });
+  });
+  var sr=liste.filter(function(r){return !r.rucher||!APP.ruchers.find(function(x){return x.nom===r.rucher;});});
+  if(sr.length){
+    h+='<div style="font-size:11px;color:#888;margin:9px 0 5px">Sans rucher</div>';
+    sr.forEach(function(r){var col=etatColor(r.etat||"Bon");h+='<div class="card" style="border-left-color:'+col+';padding:9px;cursor:pointer" onclick="detailRuche('+r.id+')"><strong>'+r.numero+'</strong> '+badge(r.etat||"Bon",col)+'</div>';});
+  }
+  return h;
+}
+
+function inspRapide(id){
+  var r=APP.ruches.find(function(x){return x.id===id;});
+  if(r){r.insp=today();sauverTout();render();toast("✅ "+r.numero+" inspectée");}
+}
+
+function detailRuche(id){
+  var r=APP.ruches.find(function(x){return x.id===id;});if(!r)return;
+  var col=etatColor(r.etat||"Bon");
+  var h='<div class="info-r"><span class="info-k">Numéro</span><span class="info-v">'+r.numero+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Type</span><span class="info-v">'+(r.typeRuche||"Pleine")+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Rucher</span><span class="info-v">'+(r.rucher||"—")+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">État</span><span class="info-v">'+badge(r.etat||"Bon",col)+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Reine</span><span class="info-v">'+(r.reine||"—")+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Race</span><span class="info-v">'+(r.race||"Buckfast")+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Population</span><span class="info-v">'+dots(r.pop||0,5,"#4A7C3F")+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Mellification</span><span class="info-v">'+dots(r.mel||0,5,"#E8A800")+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Maladie</span><span class="info-v">'+(r.mal||"Aucune")+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Inspection</span><span class="info-v">'+fmt(r.insp)+'</span></div>';
+  if(r.notes) h+='<div style="background:#fffde7;border-radius:8px;padding:8px;font-size:11px;margin:8px 0;font-style:italic">📝 '+r.notes+'</div>';
+  h+='<div style="display:flex;gap:7px;margin-top:12px">';
+  h+='<button class="btn" style="background:var(--gold);color:var(--dark);flex:2" onclick="formRuche('+id+');fermerModal()">✏️ Modifier</button>';
+  h+='<button class="btn" style="background:var(--green);color:white" onclick="inspRapide('+id+');fermerModal()">✓</button>';
+  h+='<button class="btn" style="background:var(--red);color:white" onclick="suppRuche('+id+')">🗑️</button>';
+  h+='</div>';
+  var isVide=r.typeRuche==="Vide"||r.typeRuche==="Nucléus"||r.typeRuche==="Ruchette";
+  h+='<button class="btn full" style="background:'+(isVide?"var(--green)":"#888")+';color:white;margin-top:8px" onclick="basculeType('+id+')">'+(isVide?"→ Mettre en Pleine":"→ Mettre en Vide")+'</button>';
+  ouvrirModal("🍯 "+r.numero,h);
+}
+function basculeType(id){var r=APP.ruches.find(function(x){return x.id===id;});if(!r)return;r.typeRuche=(r.typeRuche==="Vide"||r.typeRuche==="Nucléus"||r.typeRuche==="Ruchette")?"Pleine":"Vide";sauverTout();fermerModal();render();}
+
+function formRuche(id,typeDefaut){
+  var r=id?APP.ruches.find(function(x){return x.id===id;}):null;
+  var opts=APP.ruchers.map(function(x){return'<option '+(r&&r.rucher===x.nom?"selected":"")+'>'+x.nom+'</option>';}).join("");
+  var h='<input class="inp" id="r-num" value="'+(r?r.numero:"")+'" placeholder="Numéro (ex: JQ-001) *">';
+  h+='<select class="inp" id="r-type">'+TYPES_RUCHE.map(function(t){return'<option '+(r?r.typeRuche===t?"selected":"":typeDefaut===t?"selected":"")+'>'+t+'</option>';}).join("")+'</select>';
+  h+='<select class="inp" id="r-ruch"><option value="">— Rucher —</option>'+opts+'</select>';
+  h+='<div class="grid2"><select class="inp" id="r-etat">'+ETATS_RUCHE.map(function(e){return'<option '+(r&&r.etat===e?"selected":"")+'>'+e+'</option>';}).join("")+'</select>';
+  h+='<select class="inp" id="r-mal">'+MALADIES.map(function(e){return'<option '+(r&&r.mal===e?"selected":"")+'>'+e+'</option>';}).join("")+'</select></div>';
+  h+='<div class="grid2"><input class="inp" id="r-reine" value="'+(r?r.reine||"":"")+'" placeholder="Reine (année)"><input class="inp" id="r-race" value="'+(r?r.race||"Buckfast":"Buckfast")+'" placeholder="Race"></div>';
+  h+='<div class="grid2"><input class="inp" id="r-pop" type="number" min="0" max="5" value="'+(r?r.pop||3:3)+'" placeholder="Population 0-5"><input class="inp" id="r-mel" type="number" min="0" max="5" value="'+(r?r.mel||3:3)+'" placeholder="Mellification 0-5"></div>';
+  h+='<input class="inp" id="r-insp" type="date" value="'+(r&&r.insp?r.insp:"")+'">';
+  h+='<textarea class="inp" id="r-notes" rows="2" placeholder="Notes">'+(r?r.notes||"":"")+'</textarea>';
+  h+='<button class="btn full" style="background:'+(r?"var(--gold)":"var(--green)")+';color:white" onclick="sauverRuche('+(r?r.id:"null")+')">'+(r?"💾 Enregistrer":"✅ Ajouter la ruche")+'</button>';
+  ouvrirModal(r?"✏️ "+r.numero:"🍯 Nouvelle ruche",h);
+}
+function sauverRuche(id){
+  var num=document.getElementById("r-num").value.trim();if(!num){alert("Numéro obligatoire");return;}
+  var data={numero:num,typeRuche:document.getElementById("r-type").value,rucher:document.getElementById("r-ruch").value,etat:document.getElementById("r-etat").value,mal:document.getElementById("r-mal").value,reine:document.getElementById("r-reine").value,race:document.getElementById("r-race").value,pop:parseInt(document.getElementById("r-pop").value)||0,mel:parseInt(document.getElementById("r-mel").value)||0,insp:document.getElementById("r-insp").value,notes:document.getElementById("r-notes").value.trim()};
+  if(id){Object.assign(APP.ruches.find(function(x){return x.id===id;}),data);}else{data.id=genId();APP.ruches.push(data);}
+  sauverTout();fermerModal();render();
+}
+function suppRuche(id){if(!confirm("Supprimer ?"))return;APP.ruches=APP.ruches.filter(function(x){return x.id!==id;});sauverTout();fermerModal();render();}
+
+// ════════════════════════════════════════════════════════
+// VUE STOCK
+// ════════════════════════════════════════════════════════
+function vueStock(){
+  var h='<div class="stitle">📦 Stock & Matériel</div>';
+  var vides=ruchesVides();
+  if(vides.length){
+    h+='<div class="card" style="border-left-color:var(--orange);cursor:pointer" onclick="APP.vue=\'ruches\';APP.subvue=\'vides\';render()">';
+    h+='<div style="font-size:12px;font-weight:bold;color:var(--brown);margin-bottom:6px">📦 Matériel enregistré</div>';
+    ["Vide","Nucléus","Ruchette"].forEach(function(type){
+      var nb=APP.ruches.filter(function(r){return r.typeRuche===type;}).length;
+      if(nb)h+='<div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0"><span>'+type+'s</span><strong>'+nb+'</strong></div>';
+    });
+    h+='<div style="font-size:10px;color:var(--blue);margin-top:6px">Voir le détail →</div>';
+    h+='</div>';
+  }
+  var cats={};
+  APP.stockMat.forEach(function(s){cats[s.categorie]=(cats[s.categorie]||[]).concat([s]);});
+  Object.keys(cats).forEach(function(cat){
+    h+='<div style="font-size:11px;font-weight:bold;color:var(--brown);margin:10px 0 5px">'+cat+'</div>';
+    cats[cat].forEach(function(item){
+      h+='<div class="stock-item">';
+      h+='<div><div style="font-size:12px;font-weight:bold;color:var(--dark)">'+item.label+'</div>';
+      h+='<div style="font-size:10px;color:#888">'+item.unite+'</div></div>';
+      h+='<div style="display:flex;align-items:center;gap:7px">';
+      h+='<button class="qty-btn" onclick="modifStock('+item.id+',-1)">−</button>';
+      h+='<span style="font-size:20px;font-weight:bold;min-width:30px;text-align:center;color:'+(item.qte>0?"var(--green)":"#ccc")+'">'+(item.qte||0)+'</span>';
+      h+='<button class="qty-btn" onclick="modifStock('+item.id+',1)">+</button>';
+      h+='</div></div>';
+    });
+  });
+  h+='<button class="btn full" style="background:#eee;color:#333;margin-top:10px" onclick="formStockItem()">+ Article personnalisé</button>';
+  return h;
+}
+function modifStock(id,d){var i=APP.stockMat.find(function(x){return x.id===id;});if(i){i.qte=Math.max(0,(i.qte||0)+d);sauverTout();render();}}
+function formStockItem(){
+  var h='<input class="inp" id="si-cat" placeholder="Catégorie"><input class="inp" id="si-label" placeholder="Libellé *"><input class="inp" id="si-qte" type="number" min="0" value="0"><input class="inp" id="si-unit" placeholder="Unité">';
+  h+='<button class="btn full" style="background:var(--gold);color:var(--dark)" onclick="sauverStockItem()">✅ Ajouter</button>';
+  ouvrirModal("📦 Nouveau stock",h);
+}
+function sauverStockItem(){
+  var l=document.getElementById("si-label").value.trim();if(!l){alert("Libellé obligatoire");return;}
+  APP.stockMat.push({id:genId(),categorie:document.getElementById("si-cat").value||"Autre",label:l,qte:parseInt(document.getElementById("si-qte").value)||0,unite:document.getElementById("si-unit").value||"unités"});
+  sauverTout();fermerModal();render();
+}
+
+// ════════════════════════════════════════════════════════
+// VUE CARTE
+// ════════════════════════════════════════════════════════
+function vueCarte(){
+  var h='<div class="stitle">🗺️ Ruchers</div>';
+  APP.ruchers.forEach(function(r){
+    var nb=APP.ruches.filter(function(x){return x.rucher===r.nom;}).length;
+    h+='<div class="card" style="border-left-color:'+r.couleur+'">';
+    h+='<div style="display:flex;justify-content:space-between;margin-bottom:5px"><strong style="color:'+r.couleur+'">'+r.nom+'</strong><span style="font-size:10px;color:#888">'+nb+' ruche(s)</span></div>';
+    h+='<div style="font-size:10px;color:#666;margin-bottom:5px">'+r.adresse+'</div>';
+    if(r.tel) h+='<a href="tel:'+r.tel+'" style="font-size:10px;color:var(--blue);display:block;margin-bottom:5px">📞 '+r.tel+'</a>';
+    h+='<iframe src="https://www.google.com/maps?q='+r.lat+','+r.lng+'&z=14&output=embed" width="100%" height="130" frameborder="0" style="border:none;border-radius:7px" loading="lazy"></iframe>';
+    h+='<button class="btn" style="background:#eee;color:#333;font-size:10px;margin-top:7px" onclick="formRucher('+r.id+')">✏️ Modifier</button>';
+    h+='</div>';
+  });
+  h+='<button class="btn full" style="background:var(--gold);color:var(--dark)" onclick="formRucher(null)">+ Nouveau rucher</button>';
+  return h;
+}
+function formRucher(id){
+  var r=id?APP.ruchers.find(function(x){return x.id===id;}):null;
+  var h='<input class="inp" id="rc-nom" value="'+(r?r.nom:"")+'" placeholder="Nom *"><input class="inp" id="rc-adr" value="'+(r?r.adresse:"")+'" placeholder="Adresse"><input class="inp" id="rc-tel" value="'+(r?r.tel||"":"")+'" placeholder="Téléphone">';
+  h+='<div class="grid2"><input class="inp" id="rc-lat" type="number" step="0.0001" value="'+(r?r.lat:44)+'"><input class="inp" id="rc-lng" type="number" step="0.0001" value="'+(r?r.lng:1.5)+'"></div>';
+  h+='<button class="btn full" style="background:var(--gold);color:var(--dark)" onclick="sauverRucher('+(r?r.id:"null")+')">'+(r?"💾":"✅")+'</button>';
+  ouvrirModal(r?"Modifier "+r.nom:"Nouveau rucher",h);
+}
+function sauverRucher(id){
+  var nom=document.getElementById("rc-nom").value.trim();if(!nom){alert("Nom obligatoire");return;}
+  var data={nom:nom,adresse:document.getElementById("rc-adr").value,tel:document.getElementById("rc-tel").value,lat:parseFloat(document.getElementById("rc-lat").value)||44,lng:parseFloat(document.getElementById("rc-lng").value)||1.5,couleur:"#E8A800"};
+  if(id){Object.assign(APP.ruchers.find(function(x){return x.id===id;}),data);}else{data.id=genId();APP.ruchers.push(data);}
+  sauverTout();fermerModal();render();
+}
+
+// ════════════════════════════════════════════════════════
+// VUE ALERTES
+// ════════════════════════════════════════════════════════
+function vueAlertes(){
+  var urg=APP.ruches.filter(function(r){return jours(r.insp)>14||(r.mal&&r.mal!=="Aucune")||r.etat==="Faible";});
+  var h='<div class="stitle">⚠️ Alertes ('+urg.length+')</div>';
+  if(!urg.length) return h+'<div class="card" style="text-align:center;border-left-color:var(--green);padding:25px"><div style="font-size:28px">✅</div><div style="color:var(--green);font-weight:bold;margin-top:6px">Tout va bien !</div></div>';
+  urg.forEach(function(r){
+    var col=etatColor(r.etat||"Bon");
+    h+='<div class="card" style="border-left-color:'+col+'">';
+    h+='<div style="display:flex;justify-content:space-between"><strong>'+r.numero+'</strong>'+badge(r.etat||"Bon",col)+'</div>';
+    h+='<div style="font-size:10px;color:#666;margin-top:5px">';
+    if(jours(r.insp)>14) h+='<div>⏰ Non inspectée depuis <strong>'+jours(r.insp)+'j</strong></div>';
+    if(r.mal&&r.mal!=="Aucune") h+='<div>🦠 '+r.mal+'</div>';
+    if(r.etat==="Faible") h+='<div>📉 État critique</div>';
+    h+='</div>';
+    h+='<button class="btn" style="background:var(--gold);color:var(--dark);font-size:10px;margin-top:7px" onclick="inspRapide('+r.id+')">✓ Marquer inspectée</button>';
+    h+='</div>';
+  });
+  return h;
+}
+
+// ════════════════════════════════════════════════════════
+// VUE MIELLERIE
+// ════════════════════════════════════════════════════════
+function vueMiellerie(){
+  var tot=APP.stocks.reduce(function(a,s){return a+(s.poids||0);},0);
+  var h='<div class="stitle">🪣 Miellerie — '+tot+' kg stock</div>';
+  h+='<button class="btn full" style="background:var(--gold);color:var(--dark)" onclick="formStock(null)">+ Nouvelle récolte</button>';
+  APP.stocks.slice().reverse().forEach(function(s){
+    h+='<div class="card" style="cursor:pointer" onclick="formStock('+s.id+')">';
+    h+='<div style="display:flex;justify-content:space-between"><div><strong>'+s.type+'</strong> <span style="font-size:10px;color:#888">'+s.rucher+'</span></div><strong style="color:var(--gold)">'+s.poids+'kg</strong></div>';
+    h+='<div style="font-size:9px;color:#aaa;margin-top:2px">'+fmt(s.date)+'</div>';
+    h+='</div>';
+  });
+  return h;
+}
+function formStock(id){
+  var s=id?APP.stocks.find(function(x){return x.id===id;}):null;
+  var opts=APP.ruchers.map(function(r){return'<option '+(s&&s.rucher===r.nom?"selected":"")+'>'+r.nom+'</option>';}).join("");
+  var h='<select class="inp" id="s-type">'+["Acacia","Colza","Printemps","Forêt","Châtaignier","Tilleul","Bruyère","Toutes fleurs"].map(function(t){return'<option '+(s&&s.type===t?"selected":"")+'>'+t+'</option>';}).join("")+'</select>';
+  h+='<select class="inp" id="s-ruch"><option>— Rucher —</option>'+opts+'</select>';
+  h+='<input class="inp" id="s-poids" type="number" min="0" step="0.5" value="'+(s?s.poids:"")+'" placeholder="Poids kg">';
+  h+='<input class="inp" id="s-date" type="date" value="'+(s?s.date:today())+'">';
+  h+='<textarea class="inp" id="s-notes" rows="2">'+(s?s.notes||"":"")+'</textarea>';
+  h+='<button class="btn full" style="background:var(--gold);color:var(--dark)" onclick="sauverStock('+(s?s.id:"null")+')">'+(s?"💾":"✅ Ajouter")+'</button>';
+  ouvrirModal("🪣 Récolte",h);
+}
+function sauverStock(id){
+  var data={type:document.getElementById("s-type").value,rucher:document.getElementById("s-ruch").value,poids:parseFloat(document.getElementById("s-poids").value)||0,date:document.getElementById("s-date").value,notes:document.getElementById("s-notes").value.trim()};
+  if(id){Object.assign(APP.stocks.find(function(x){return x.id===id;}),data);}else{data.id=genId();APP.stocks.push(data);}
+  sauverTout();fermerModal();render();
+}
+
+// ════════════════════════════════════════════════════════
+// VUE REINES
+// ════════════════════════════════════════════════════════
+function vueReines(){
+  var pondeuses=APP.reines.filter(function(r){return r.statut==="Pondeuse";}).length;
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+  h+='<div class="stitle" style="margin-bottom:0">👑 Reines ('+APP.reines.length+')</div>';
+  h+='<button class="btn" style="background:#8b5cf6;color:white;font-size:11px" onclick="formReine(null)">+ Nouvelle</button>';
+  h+='</div>';
+  var statuts={};APP.reines.forEach(function(r){statuts[r.statut]=(statuts[r.statut]||0)+1;});
+  h+='<div style="display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px">';
+  ["Cellule royale","Vierge","Fécondée","Pondeuse","Remplacée","Morte"].forEach(function(s){
+    if(statuts[s]) h+='<button class="btn" style="background:'+statutReineColor(s)+'22;color:'+statutReineColor(s)+';font-size:9px;padding:4px 9px;flex-shrink:0;border:1px solid '+statutReineColor(s)+'40" onclick="filtreReine(\''+s+'\')">'+s+' ('+statuts[s]+')</button>';
+  });
+  h+='</div>';
+  var grefs={};APP.reines.forEach(function(r){grefs[r.greffage||r.elevage]=(grefs[r.greffage||r.elevage]||[]).concat([r]);});
+  Object.keys(grefs).forEach(function(g){
+    var list=grefs[g];
+    h+='<div style="font-size:11px;font-weight:bold;color:#555;margin:8px 0 5px">🐝 '+g+' ('+list.length+')</div>';
+    list.forEach(function(r){
+      var col=statutReineColor(r.statut);
+      h+='<div class="card" style="border-left-color:'+col+';padding:8px;cursor:pointer" onclick="detailReine('+r.id+')">';
+      h+='<div style="display:flex;justify-content:space-between"><strong style="font-size:12px">'+r.numero+'</strong>'+badge(r.statut,col)+'</div>';
+      h+='<div style="font-size:9px;color:#888;margin-top:3px">'+r.ruche+' · Greffe: '+fmt(r.dateGreffe)+'</div>';
+      if(r.dateNee||r.dateFeco||r.datePonte){
+        h+='<div style="font-size:9px;color:#aaa">'+(r.dateNee?"Née:"+fmt(r.dateNee):"")+' '+(r.dateFeco?"Féc:"+fmt(r.dateFeco):"")+' '+(r.datePonte?"Ponte:"+fmt(r.datePonte):"")+'</div>';
+      }
+      h+='</div>';
+    });
+  });
+  return h;
+}
+function filtreReine(s){
+  var list=APP.reines.filter(function(r){return r.statut===s;});
+  var h='<button class="btn" style="background:#eee;color:#333;font-size:10px;margin-bottom:10px" onclick="render()">← Retour</button>';
+  h+='<div class="stitle">'+s+' ('+list.length+')</div>';
+  list.forEach(function(r){
+    var col=statutReineColor(r.statut);
+    h+='<div class="card" style="border-left-color:'+col+';padding:8px;cursor:pointer" onclick="detailReine('+r.id+')"><div style="display:flex;justify-content:space-between"><strong>'+r.numero+'</strong>'+badge(r.statut,col)+'</div><div style="font-size:9px;color:#888">'+r.elevage+' · '+r.ruche+'</div></div>';
+  });
+  document.getElementById("page").innerHTML=h;
+}
+function detailReine(id){
+  var r=APP.reines.find(function(x){return x.id===id;});if(!r)return;
+  var col=statutReineColor(r.statut);
+  var h='<div class="info-r"><span class="info-k">Numéro</span><span class="info-v">'+r.numero+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Greffage</span><span class="info-v">'+(r.greffage||r.elevage)+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Statut</span><span class="info-v">'+badge(r.statut,col)+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Ruche</span><span class="info-v">'+r.ruche+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Mère</span><span class="info-v">'+(r.mere||"—")+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Greffe</span><span class="info-v">'+fmt(r.dateGreffe)+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Naissance</span><span class="info-v">'+fmt(r.dateNee)+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Fécondation</span><span class="info-v">'+fmt(r.dateFeco)+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Ponte</span><span class="info-v">'+fmt(r.datePonte)+'</span></div>';
+  if(r.notes) h+='<div style="background:#fffde7;border-radius:8px;padding:8px;font-size:11px;margin:8px 0;font-style:italic">'+r.notes+'</div>';
+  h+='<div style="margin:10px 0 6px;font-size:10px;color:#888">Changer statut :</div>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">';
+  STATUTS_REINE.forEach(function(s){
+    h+='<button class="btn" style="font-size:9px;padding:4px 9px;background:'+(r.statut===s?statutReineColor(s):"#eee")+';color:'+(r.statut===s?"white":"#333")+'" onclick="changerStatutReine('+id+',\''+s+'\')">'+s+'</button>';
+  });
+  h+='</div>';
+  h+='<div style="display:flex;gap:7px"><button class="btn" style="background:#8b5cf6;color:white;flex:2" onclick="formReine('+id+');fermerModal()">✏️ Modifier</button><button class="btn" style="background:var(--red);color:white" onclick="suppReine('+id+')">🗑️</button></div>';
+  ouvrirModal("👑 "+r.numero,h);
+}
+function changerStatutReine(id,s){
+  var r=APP.reines.find(function(x){return x.id===id;});if(!r)return;
+  r.statut=s;
+  if(s==="Vierge"&&!r.dateNee)r.dateNee=today();
+  if(s==="Fécondée"&&!r.dateFeco)r.dateFeco=today();
+  if(s==="Pondeuse"&&!r.datePonte)r.datePonte=today();
+  sauverTout();fermerModal();render();
+}
+function formReine(id){
+  var r=id?APP.reines.find(function(x){return x.id===id;}):null;
+  var h='<div class="grid2"><input class="inp" id="q-num" value="'+(r?r.numero:"")+'" placeholder="Numéro *"><input class="inp" id="q-elev" value="'+(r?r.elevage:"")+'" placeholder="Élevage"></div>';
+  h+='<div class="grid2"><input class="inp" id="q-ruche" value="'+(r?r.ruche:"")+'" placeholder="Ruche"><input class="inp" id="q-mere" value="'+(r?r.mere||"":"")+'" placeholder="Mère"></div>';
+  h+='<select class="inp" id="q-statut">'+STATUTS_REINE.map(function(s){return'<option '+(r&&r.statut===s?"selected":"")+'>'+s+'</option>';}).join("")+'</select>';
+  h+='<div class="grid2"><input class="inp" id="q-greffe" type="date" value="'+(r&&r.dateGreffe?r.dateGreffe:"")+'"><input class="inp" id="q-nee" type="date" value="'+(r&&r.dateNee?r.dateNee:"")+'"></div>';
+  h+='<div class="grid2"><input class="inp" id="q-feco" type="date" value="'+(r&&r.dateFeco?r.dateFeco:"")+'"><input class="inp" id="q-ponte" type="date" value="'+(r&&r.datePonte?r.datePonte:"")+'"></div>';
+  h+='<textarea class="inp" id="q-notes" rows="2">'+(r?r.notes||"":"")+'</textarea>';
+  h+='<button class="btn full" style="background:#8b5cf6;color:white" onclick="sauverReine('+(r?r.id:"null")+')">'+(r?"💾":"✅ Ajouter")+'</button>';
+  ouvrirModal(r?"Modifier "+r.numero:"Nouvelle reine",h);
+}
+function sauverReine(id){
+  var num=document.getElementById("q-num").value.trim();if(!num){alert("Numéro obligatoire");return;}
+  var data={numero:num,elevage:document.getElementById("q-elev").value,ruche:document.getElementById("q-ruche").value,statut:document.getElementById("q-statut").value,mere:document.getElementById("q-mere").value,dateGreffe:document.getElementById("q-greffe").value,dateNee:document.getElementById("q-nee").value,dateFeco:document.getElementById("q-feco").value,datePonte:document.getElementById("q-ponte").value,notes:document.getElementById("q-notes").value.trim(),ligne:"Buckfast"};
+  if(id){Object.assign(APP.reines.find(function(x){return x.id===id;}),data);}else{data.id=genId();APP.reines.push(data);}
+  sauverTout();fermerModal();render();
+}
+function suppReine(id){if(!confirm("Supprimer ?"))return;APP.reines=APP.reines.filter(function(x){return x.id!==id;});sauverTout();fermerModal();render();}
+
+// ════════════════════════════════════════════════════════
+// VUE TRANSHUMANCE
+// ════════════════════════════════════════════════════════
+function vueTranshumance(){
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+  h+='<div class="stitle" style="margin-bottom:0">🚐 Transhumance</div>';
+  h+='<button class="btn" style="background:var(--blue);color:white;font-size:11px" onclick="formTransh(null)">+ Zone</button>';
+  h+='</div>';
+  STATUTS_TRANSH.forEach(function(s){
+    var zones=APP.transh.filter(function(t){return t.statut===s;});if(!zones.length)return;
+    var col=statutTranshColor(s);
+    h+='<div style="font-size:10px;font-weight:bold;color:'+col+';margin:9px 0 5px">'+s+' ('+zones.length+')</div>';
+    zones.forEach(function(t){
+      h+='<div class="card" style="border-left-color:'+col+';padding:9px;cursor:pointer" onclick="detailTransh('+t.id+')">';
+      h+='<div style="display:flex;justify-content:space-between"><strong>'+t.nom+'</strong>'+badge(s,col)+'</div>';
+      h+='<div style="font-size:9px;color:#888;margin-top:3px">'+t.commune+' · '+t.distance+'km · '+MOIS[t.mois_debut-1]+'→'+MOIS[t.mois_fin-1]+' · '+t.nb_ruches+' ruches</div>';
+      h+='</div>';
+    });
+  });
+  return h;
+}
+function detailTransh(id){
+  var t=APP.transh.find(function(x){return x.id===id;});if(!t)return;
+  var col=statutTranshColor(t.statut);
+  var h='<div class="info-r"><span class="info-k">Zone</span><span class="info-v">'+t.nom+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Statut</span><span class="info-v">'+badge(t.statut,col)+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Distance</span><span class="info-v">'+t.distance+' km</span></div>';
+  h+='<div class="info-r"><span class="info-k">Période</span><span class="info-v">'+MOIS[t.mois_debut-1]+' → '+MOIS[t.mois_fin-1]+'</span></div>';
+  h+='<div class="info-r"><span class="info-k">Ruches</span><span class="info-v">'+t.nb_ruches+'</span></div>';
+  if(t.tel) h+='<div class="info-r"><span class="info-k">Tel</span><a href="tel:'+t.tel+'" style="color:var(--blue);font-size:11px">'+t.tel+'</a></div>';
+  if(t.notes) h+='<div style="background:#fffde7;border-radius:8px;padding:8px;font-size:11px;margin:8px 0;font-style:italic">'+t.notes+'</div>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:5px;margin:10px 0">';
+  STATUTS_TRANSH.forEach(function(s){h+='<button class="btn" style="font-size:9px;padding:4px 9px;background:'+(t.statut===s?col:"#eee")+';color:'+(t.statut===s?"white":"#333")+'" onclick="changerStatutTransh('+id+',\''+s+'\')">'+s+'</button>';});
+  h+='</div>';
+  h+='<iframe src="https://www.google.com/maps?q='+t.lat+','+t.lng+'&z=11&output=embed" width="100%" height="130" frameborder="0" style="border:none;border-radius:7px;margin-bottom:10px" loading="lazy"></iframe>';
+  h+='<div style="display:flex;gap:7px"><button class="btn" style="background:var(--blue);color:white;flex:2" onclick="formTransh('+id+');fermerModal()">✏️</button><button class="btn" style="background:var(--red);color:white" onclick="suppTransh('+id+')">🗑️</button></div>';
+  ouvrirModal("🚐 "+t.nom,h);
+}
+function changerStatutTransh(id,s){var t=APP.transh.find(function(x){return x.id===id;});if(t){t.statut=s;sauverTout();fermerModal();render();}}
+function suppTransh(id){if(!confirm("Supprimer ?"))return;APP.transh=APP.transh.filter(function(x){return x.id!==id;});sauverTout();fermerModal();render();}
+function formTransh(id){
+  var t=id?APP.transh.find(function(x){return x.id===id;}):null;
+  var h='<input class="inp" id="t-nom" value="'+(t?t.nom:"")+'" placeholder="Nom *"><input class="inp" id="t-com" value="'+(t?t.commune:"")+'" placeholder="Commune">';
+  h+='<div class="grid2"><input class="inp" id="t-dist" type="number" value="'+(t?t.distance:50)+'"><input class="inp" id="t-ruches" type="number" value="'+(t?t.nb_ruches:10)+'"></div>';
+  h+='<div class="grid2"><select class="inp" id="t-type">'+["ONF","Mairie","Privé","Agriculteur"].map(function(x){return'<option '+(t&&t.type===x?"selected":"")+'>'+x+'</option>';}).join("")+'</select>';
+  h+='<select class="inp" id="t-stat">'+STATUTS_TRANSH.map(function(s){return'<option '+(t&&t.statut===s?"selected":"")+'>'+s+'</option>';}).join("")+'</select></div>';
+  h+='<div class="grid2"><select class="inp" id="t-deb">'+MOIS.map(function(m,i){return'<option value="'+(i+1)+'" '+(t&&t.mois_debut===(i+1)?"selected":"")+'>'+m+'</option>';}).join("")+'</select>';
+  h+='<select class="inp" id="t-fin">'+MOIS.map(function(m,i){return'<option value="'+(i+1)+'" '+(t&&t.mois_fin===(i+1)?"selected":"")+'>'+m+'</option>';}).join("")+'</select></div>';
+  h+='<input class="inp" id="t-tel" value="'+(t?t.tel||"":"")+'" placeholder="Téléphone">';
+  h+='<div class="grid2"><input class="inp" id="t-lat" type="number" step="0.001" value="'+(t?t.lat:44)+'"><input class="inp" id="t-lng" type="number" step="0.001" value="'+(t?t.lng:1.5)+'"></div>';
+  h+='<textarea class="inp" id="t-notes" rows="2">'+(t?t.notes:"")+'</textarea>';
+  h+='<button class="btn full" style="background:var(--blue);color:white" onclick="sauverTransh('+(t?t.id:"null")+')">'+(t?"💾":"✅ Ajouter")+'</button>';
+  ouvrirModal(t?"Modifier "+t.nom:"Nouvelle zone",h);
+}
+function sauverTransh(id){
+  var nom=document.getElementById("t-nom").value.trim();if(!nom){alert("Nom obligatoire");return;}
+  var data={nom:nom,commune:document.getElementById("t-com").value,distance:parseInt(document.getElementById("t-dist").value)||50,nb_ruches:parseInt(document.getElementById("t-ruches").value)||10,type:document.getElementById("t-type").value,statut:document.getElementById("t-stat").value,mois_debut:parseInt(document.getElementById("t-deb").value),mois_fin:parseInt(document.getElementById("t-fin").value),tel:document.getElementById("t-tel").value,lat:parseFloat(document.getElementById("t-lat").value)||44,lng:parseFloat(document.getElementById("t-lng").value)||1.5,notes:document.getElementById("t-notes").value.trim(),miellees:[]};
+  if(id){Object.assign(APP.transh.find(function(x){return x.id===id;}),data);}else{data.id=genId();APP.transh.push(data);}
+  sauverTout();fermerModal();render();
+}
+
+// ════════════════════════════════════════════════════════
+// VUE COMPTA
+// ════════════════════════════════════════════════════════
+function vueCompta(){
+  var ca=APP.ventes.reduce(function(a,v){return a+(v.montant||0);},0);
+  var dep=APP.depenses.reduce(function(a,d){return a+(d.montant||0);},0);
+  var h='<div class="stitle">💰 Comptabilité</div>';
+  h+='<div class="stat-row"><div class="stat-box"><div class="stat-nb" style="color:var(--green)">'+ca+'€</div><div class="stat-lb">Ventes</div></div>';
+  h+='<div class="stat-box"><div class="stat-nb" style="color:var(--red)">'+dep+'€</div><div class="stat-lb">Dépenses</div></div>';
+  h+='<div class="stat-box"><div class="stat-nb" style="color:'+(ca-dep>=0?"var(--green)":"var(--red)")+'">'+(ca-dep)+'€</div><div class="stat-lb">Bilan</div></div></div>';
+  h+='<div style="display:flex;gap:8px;margin-bottom:12px"><button class="btn" style="background:var(--green);color:white;flex:1" onclick="formVente()">+ Vente</button><button class="btn" style="background:var(--red);color:white;flex:1" onclick="formDepense()">+ Dépense</button></div>';
+  var ops=APP.ventes.map(function(v){return{date:v.date,lib:v.produit+(v.client?" — "+v.client:""),montant:"+"+v.montant+"€",col:"var(--green)"};})
+    .concat(APP.depenses.map(function(d){return{date:d.date,lib:d.label,montant:"-"+d.montant+"€",col:"var(--red)"};}))
+    .sort(function(a,b){return new Date(b.date)-new Date(a.date);}).slice(0,20);
+  ops.forEach(function(o){h+='<div class="card" style="padding:8px;border-left-color:'+o.col+'"><div style="display:flex;justify-content:space-between"><span style="font-size:11px">'+o.lib+'</span><strong style="color:'+o.col+'">'+o.montant+'</strong></div><div style="font-size:9px;color:#aaa">'+fmt(o.date)+'</div></div>';});
+  return h;
+}
+function formVente(){var h='<input class="inp" id="v-prod" placeholder="Produit"><input class="inp" id="v-client" placeholder="Client"><input class="inp" id="v-montant" type="number" placeholder="Montant €"><input class="inp" id="v-date" type="date" value="'+today()+'"><textarea class="inp" id="v-notes" rows="2"></textarea><button class="btn full" style="background:var(--green);color:white" onclick="sauverVente()">✅</button>';ouvrirModal("💰 Vente",h);}
+function sauverVente(){APP.ventes.push({id:genId(),produit:document.getElementById("v-prod").value,client:document.getElementById("v-client").value,montant:parseFloat(document.getElementById("v-montant").value)||0,date:document.getElementById("v-date").value,notes:document.getElementById("v-notes").value});sauverTout();fermerModal();render();}
+function formDepense(){var h='<input class="inp" id="d-lab" placeholder="Libellé *"><input class="inp" id="d-montant" type="number" placeholder="Montant €"><input class="inp" id="d-date" type="date" value="'+today()+'"><button class="btn full" style="background:var(--red);color:white" onclick="sauverDepense()">✅</button>';ouvrirModal("💸 Dépense",h);}
+function sauverDepense(){APP.depenses.push({id:genId(),label:document.getElementById("d-lab").value,montant:parseFloat(document.getElementById("d-montant").value)||0,date:document.getElementById("d-date").value});sauverTout();fermerModal();render();}
+
+// ════════════════════════════════════════════════════════
+// VUE JOURNAL
+// ════════════════════════════════════════════════════════
+function vueJournal(){
+  var h='<div class="stitle">📖 Journal</div><button class="btn full" style="background:var(--dark);color:var(--gold)" onclick="formJournal(null)">+ Note</button>';
+  APP.journal.slice().reverse().forEach(function(j){
+    h+='<div class="card" style="border-left-color:#888;cursor:pointer" onclick="formJournal('+j.id+')">';
+    h+='<div style="display:flex;justify-content:space-between;margin-bottom:2px"><strong style="font-size:12px">'+j.titre+'</strong><span style="font-size:9px;color:#aaa">'+fmt(j.date)+'</span></div>';
+    if(j.rucher) h+='<div style="font-size:9px;color:#aaa">📍 '+j.rucher+'</div>';
+    h+='<div style="font-size:11px;color:#555;margin-top:3px">'+j.texte.substring(0,100)+(j.texte.length>100?"...":"")+'</div></div>';
+  });
+  return h;
+}
+function formJournal(id){
+  var j=id?APP.journal.find(function(x){return x.id===id;}):null;
+  var opts=APP.ruchers.map(function(r){return'<option '+(j&&j.rucher===r.nom?"selected":"")+'>'+r.nom+'</option>';}).join("");
+  var h='<input class="inp" id="j-titre" value="'+(j?j.titre:"")+'" placeholder="Titre *"><select class="inp" id="j-ruch"><option value="">— Rucher —</option>'+opts+'</select><input class="inp" id="j-date" type="date" value="'+(j?j.date:today())+'"><textarea class="inp" id="j-texte" rows="5" placeholder="Observations…">'+(j?j.texte||"":"")+'</textarea>';
+  h+='<div style="display:flex;gap:7px"><button class="btn" style="background:var(--dark);color:var(--gold);flex:2" onclick="sauverJournal('+(j?j.id:"null")+')">'+(j?"💾":"✅")+'</button>'+(j?'<button class="btn" style="background:var(--red);color:white" onclick="suppJournal('+j.id+')">🗑️</button>':'')+'</div>';
+  ouvrirModal(j?"Modifier note":"📖 Nouvelle note",h);
+}
+function sauverJournal(id){
+  var t=document.getElementById("j-titre").value.trim();if(!t){alert("Titre obligatoire");return;}
+  var data={titre:t,rucher:document.getElementById("j-ruch").value,date:document.getElementById("j-date").value,texte:document.getElementById("j-texte").value.trim()};
+  if(id){Object.assign(APP.journal.find(function(x){return x.id===id;}),data);}else{data.id=genId();APP.journal.push(data);}
+  sauverTout();fermerModal();render();
+}
+function suppJournal(id){if(!confirm("Supprimer ?"))return;APP.journal=APP.journal.filter(function(x){return x.id!==id;});sauverTout();fermerModal();render();}
+
+// ════════════════════════════════════════════════════════
+// FAB & RENDER
+// ════════════════════════════════════════════════════════
+function fabAction(){
+  var a={ruches:function(){formRuche(null);},stock:formStockItem,miel:function(){formStock(null);},reines:function(){formReine(null);},transh:function(){formTransh(null);},compta:formVente,journal:function(){formJournal(null);},carte:function(){formRucher(null);}};
+  (a[APP.vue]||demarrerVoix)();
+}
+
+function render(){
+  var vues={accueil:vueAccueil,ruches:vueRuches,stock:vueStock,carte:vueCarte,alertes:vueAlertes,miel:vueMiellerie,reines:vueReines,transh:vueTranshumance,compta:vueCompta,journal:vueJournal};
+  document.getElementById("page").innerHTML=(vues[APP.vue]||vueAccueil)();
+  var urg=APP.ruches.filter(function(r){return jours(r.insp)>14||(r.mal&&r.mal!=="Aucune")||r.etat==="Faible";}).length;
+  var nav=[{id:"accueil",ic:"🏠",lb:"Accueil"},{id:"ruches",ic:"🐝",lb:"Ruches"},{id:"stock",ic:"📦",lb:"Stock"},{id:"miel",ic:"🪣",lb:"Miel"},{id:"reines",ic:"👑",lb:"Reines"},{id:"transh",ic:"🚐",lb:"Transh."},{id:"compta",ic:"💰",lb:"Compta"},{id:"alertes",ic:"⚠️",lb:urg>0?"("+urg+")":"Alertes"},{id:"journal",ic:"📖",lb:"Journal"}];
+  document.getElementById("nav").innerHTML=nav.map(function(n){return'<button class="ntab'+(APP.vue===n.id?" on":"")+'" onclick="APP.vue=\''+n.id+'\';render()"><span class="nicon">'+n.ic+'</span>'+n.lb+'</button>';}).join("");
+  var fabIcons={ruches:"🍯",stock:"📦",miel:"🪣",reines:"👑",transh:"🚐",compta:"💰",journal:"📝",carte:"📍"};
+  document.getElementById("fab").textContent=fabIcons[APP.vue]||"🎙️";
+}
+render();
+</script>
+</body>
+</html>
