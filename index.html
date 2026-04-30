@@ -211,6 +211,18 @@ var APP={
   marche:ld("jj_marche",[]),
   reinesFiltreGref:"Toutes",reinesFiltreStatut:"Tous",reineSelected:null
 };
+function migration(){
+  // Ajouter G5 si absent
+  var hasG5=APP.reines.some(function(r){return r.greffage==="G5-Delanoy F1";});
+  if(!hasG5){
+    function pad2(n){return String(n).padStart(2,"0");}
+    for(var i=35;i<=48;i++){
+      APP.reines.push({id:300+i,numero:"R2026-D"+pad2(i),greffage:"G5-Delanoy F1",elevage:"Delanoy F1",mere:"Souche Delanoy F1",ligne:"Buckfast",ruche:"NUC-D"+pad2(i),dateGreffe:"2026-04-22",dateNee:null,dateFeco:null,datePonte:null,dateIntroduction:null,statut:"Cellule royale",notes:"Greffage 5 - 22/04/2026 - 14 cellules acceptees",productivite:null});
+    }
+    sT();
+    toast("G5 Delanoy F1 ajoute - 14 reines");
+  }
+}
 function sT(){sv("jj_ruches",APP.ruches);sv("jj_ruchers",APP.ruchers);sv("jj_reines",APP.reines);sv("jj_transh",APP.transh);sv("jj_stocks",APP.stocks);sv("jj_stockMat",APP.stockMat);sv("jj_ventes",APP.ventes);sv("jj_depenses",APP.depenses);sv("jj_journal",APP.journal);sv("jj_marche",APP.marche);}
 // Sauvegarde auto toutes les 2 minutes
 setInterval(function(){sT();toast("Sauvegarde auto");},120000);
@@ -881,6 +893,7 @@ function render(){
     return '<button class="ntab'+(APP.vue===n.id?" on":"")+'" onclick="APP.vue=\''+n.id+'\';render()"><div class="nicon">'+ic+'</div>'+(n.badge?'<div class="nbadge">'+n.badge+'</div>':'')+n.lb+'</button>';
   }).join("");
 }
+migration();
 render();
 </script>
 </body>
