@@ -144,7 +144,7 @@ var MALADIES=["Aucune","Varroa faible","Varroa eleve","Nosema","Loque","Autre"];
 var TYPES_R=["Pleine","Vide","Nucleus","Ruchette"];
 var ST_TRANSH=["Prospection","Contacte","En cours","Autorise","Refuse"];
 var ST_REINE=["Elevage","Cellule royale","Vierge","Fecondee","Pondeuse","Remplacee","Morte"];
-var GCOLS={"G1-Delanoy F1":{bg:"#ede9fe",text:"#6d28d9",border:"#8b5cf6",label:"G1 Del.F1"},"G1-Delanoy F3":{bg:"#fff7ed",text:"#c2410c",border:"#f97316",label:"G1 Del.F3"},"G2-Yann F1":{bg:"#dbeafe",text:"#1d4ed8",border:"#3b82f6",label:"G2 Yann F1"},"G3-Delanoy F1":{bg:"#fce7f3",text:"#9d174d",border:"#ec4899",label:"G3 Del.F1"},"G4-Yann F1":{bg:"#d1fae5",text:"#065f46",border:"#10b981",label:"G4 Yann F1"},"G5-Delanoy F1":{bg:"#fdf4ff",text:"#7e22ce",border:"#a855f7",label:"G5 Del.F1"},"G6-Yann F1":{bg:"#dbeafe",text:"#1e3a8a",border:"#3b82f6",label:"G6 Yann F1"},"G7-Delanoy F1":{bg:"#f5f3ff",text:"#5b21b6",border:"#7c3aed",label:"G7 Del.F1"}};
+var GCOLS={"G1-Delanoy F1":{bg:"#ede9fe",text:"#6d28d9",border:"#8b5cf6",label:"G1 Del.F1"},"G1-Delanoy F3":{bg:"#fff7ed",text:"#c2410c",border:"#f97316",label:"G1 Del.F3"},"G2-Yann F1":{bg:"#dbeafe",text:"#1d4ed8",border:"#3b82f6",label:"G2 Yann F1"},"G3-Delanoy F1":{bg:"#fce7f3",text:"#9d174d",border:"#ec4899",label:"G3 Del.F1"},"G4-Yann F1":{bg:"#d1fae5",text:"#065f46",border:"#10b981",label:"G4 Yann F1"},"G5-Delanoy F1":{bg:"#fdf4ff",text:"#7e22ce",border:"#a855f7",label:"G5 Del.F1"},"G6-Yann F1":{bg:"#dbeafe",text:"#1e3a8a",border:"#3b82f6",label:"G6 Yann F1"},"G7-Delanoy F1":{bg:"#f5f3ff",text:"#5b21b6",border:"#7c3aed",label:"G7 Del.F1"},"G8-Yann F1":{bg:"#eff6ff",text:"#1e40af",border:"#60a5fa",label:"G8 Yann F1"}};
 var SCOLS={"Elevage":"#f59e0b","Cellule royale":"#8b5cf6","Vierge":"#ec4899","Fecondee":"#10b981","Pondeuse":"#22c55e","Remplacee":"#6b7280","Morte":"#ef4444"};
 var GINFO=[
   {key:"G1-Delanoy F1",label:"G1 Delanoy F1",date:"05/04/2026",naissance:"~15 avr.",fecond:"~25 avr.",ponte:"~4 mai"},
@@ -154,7 +154,8 @@ var GINFO=[
   {key:"G4-Yann F1",label:"G4 Yann F1",date:"19/04/2026",naissance:"~29 avr.",fecond:"~9 mai",ponte:"~18 mai"},
   {key:"G5-Delanoy F1",label:"G5 Delanoy F1",date:"22/04/2026",naissance:"~2 mai",fecond:"~12 mai",ponte:"~21 mai"},
   {key:"G6-Yann F1",label:"G6 Yann F1",date:"07/05/2026",naissance:"~17 mai",fecond:"~28 mai",ponte:"~5 juin"},
-  {key:"G7-Delanoy F1",label:"G7 Delanoy F1",date:"07/05/2026",naissance:"~17 mai",fecond:"~28 mai",ponte:"~5 juin"}
+  {key:"G7-Delanoy F1",label:"G7 Delanoy F1",date:"07/05/2026",naissance:"~17 mai",fecond:"~28 mai",ponte:"~5 juin"},
+  {key:"G8-Yann F1",label:"G8 Yann F1",date:"17/05/2026",naissance:"~27 mai",fecond:"~7 juin",ponte:"~15 juin"}
 ];
 // J+X depuis la date de greffe
 var JOURS_NAISSANCE=10, JOURS_FECOND=21, JOURS_PONTE=29;
@@ -188,6 +189,7 @@ var REINES_INIT=(function(){
   for(var i=35;i<=48;i++) a(300+i,"R2026-D"+pad(i),"G5-Delanoy F1","Delanoy F1","Souche Delanoy F1","NUC-D"+pad(i),"2026-04-22");
   for(var i=55;i<=80;i++) a(400+i,"R2026-Y"+pad(i),"G6-Yann F1","Yann F1","Souche Yann F1","NUC-Y"+pad(i),"2026-05-07");
   for(var i=49;i<=85;i++) a(500+i,"R2026-D"+pad(i),"G7-Delanoy F1","Delanoy F1","Souche Delanoy F1","NUC-D"+pad(i),"2026-05-07");
+  for(var i=81;i<=93;i++) a(600+i,"R2026-Y"+pad(i),"G8-Yann F1","Yann F1","Souche Yann F1","NUC-Y"+pad(i),"2026-05-17");
   return r;
 })();
 var STOCK_INIT=[
@@ -236,6 +238,11 @@ function migration(){
   if(!hasG7){
     for(var i=49;i<=85;i++){APP.reines.push({id:500+i,numero:"R2026-D"+pad2(i),greffage:"G7-Delanoy F1",elevage:"Delanoy F1",mere:"Souche Delanoy F1",ligne:"Buckfast",ruche:"NUC-D"+pad2(i),dateGreffe:"2026-05-07",dateNee:null,dateFeco:null,datePonte:null,dateIntroduction:null,statut:"Cellule royale",notes:"G7 07/05/2026 37 acceptees",productivite:null});}
     sT();toast("G7 Delanoy F1 ajoute - 37 reines");
+  }
+  var hasG8=APP.reines.some(function(r){return r.greffage==="G8-Yann F1";});
+  if(!hasG8){
+    for(var i=81;i<=93;i++){APP.reines.push({id:600+i,numero:"R2026-Y"+pad2(i),greffage:"G8-Yann F1",elevage:"Yann F1",mere:"Souche Yann F1",ligne:"Buckfast",ruche:"NUC-Y"+pad2(i),dateGreffe:"2026-05-17",dateNee:null,dateFeco:null,datePonte:null,dateIntroduction:null,statut:"Cellule royale",notes:"G8 17/05/2026 13 acceptees",productivite:null});}
+    sT();toast("G8 Yann F1 ajoute - 13 reines");
   }
 }
 function sT(){sv("jj_ruches",APP.ruches);sv("jj_ruchers",APP.ruchers);sv("jj_reines",APP.reines);sv("jj_transh",APP.transh);sv("jj_stocks",APP.stocks);sv("jj_stockMat",APP.stockMat);sv("jj_ventes",APP.ventes);sv("jj_depenses",APP.depenses);sv("jj_journal",APP.journal);sv("jj_marche",APP.marche);}
@@ -759,7 +766,7 @@ function changerSR(id,s){
 }
 function formReine(id){
   var r=id?APP.reines.find(function(x){return x.id===id;}):null;
-  var go=["G1-Delanoy F1","G1-Delanoy F3","G2-Yann F1","G3-Delanoy F1","G4-Yann F1","G5-Delanoy F1","G6-Yann F1","G7-Delanoy F1"];
+  var go=["G1-Delanoy F1","G1-Delanoy F3","G2-Yann F1","G3-Delanoy F1","G4-Yann F1","G5-Delanoy F1","G6-Yann F1","G7-Delanoy F1","G8-Yann F1"];
   var h='<div class="grid2"><input class="inp" id="q-n" value="'+(r?r.numero:"")+'" placeholder="Numero *"><select class="inp" id="q-g">'+go.map(function(g){return'<option '+(r&&r.greffage===g?"selected":"")+'>'+g+'</option>';}).join("")+'</select></div>';
   h+='<div class="grid2"><input class="inp" id="q-r" value="'+(r?r.ruche:"")+'" placeholder="Ruche/Nucleus"><input class="inp" id="q-e" value="'+(r?r.elevage:"")+'" placeholder="Elevage"></div>';
   h+='<div class="grid2"><input class="inp" id="q-m" value="'+(r?r.mere||"":"")+'" placeholder="Souche mere"><select class="inp" id="q-s">'+ST_REINE.map(function(s){return'<option '+(r&&r.statut===s?"selected":"")+'>'+s+'</option>';}).join("")+'</select></div>';
